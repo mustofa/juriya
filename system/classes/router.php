@@ -3,7 +3,7 @@
 /**
  * Juriya - RAD PHP 5 Micro Framework
  *
- * Base View
+ * Router class
  *
  * @package  Juriya
  * @category Core Class
@@ -27,6 +27,16 @@ class Router {
 	 * @var string Requested executor
 	 */
 	public $executor;
+
+	/**
+	 * @var string Requested module
+	 */
+	public $module;
+
+	/**
+	 * @var string Controller path
+	 */
+	public $path;
 
 	/**
 	 * @var string Requested controller
@@ -108,18 +118,13 @@ class Router {
 
 		}, $arguments);
 
-		// Set controller namespace
-		$controller_ns = 'application\\controllers\\';
-
 		// Check the routes configuration against the arguments
 		if (FALSE !== ($routes = Juriya::$config['ROUTES']))
 		{
 			if (empty($arguments))
 			{
 				// Get the default route
-				$this->controller = $controller_ns 
-
-								  . $routes['default']['controller'];
+				$this->controller =  $routes['default']['controller'];
 			}
 			
 			else
@@ -132,22 +137,65 @@ class Router {
 						and $arguments == $intersection )
 					{
 						// Set match controller
-						$this->controller = $controller_ns
-
-										  . $routes[$route_name]['controller'];
+						$this->controller = $routes[$route_name]['controller'];
 
 						continue;
 					}
 				}
 
-				if (is_null($this->controller)
-
-					and ($controller_name = $controller_ns . implode('\\', $arguments))
-
-					and class_exists($controller_name))
+				// Looking whether the request is asking for module
+				if (count($arguments) >= 2)
 				{
-					// The request arguments already contain valid controller
-					$this->controller = $controller_name;
+					$array = new \ArrayObject($arguments);
+
+					$iterator = $array->getIterator();
+
+					$namespace = '\\modules\\' . $iterator->current() . '\\classes\\controllers\\';
+
+					$module = $iterator->current();
+
+					$iterator->next();
+
+					$controller_fragments = array();
+
+					while($iterator->valid())
+					{
+						$controller_fragments[] = $iterator->current();
+
+						$namespace .= $iterator->current() . '\\';
+
+						$iterator->next();
+					}
+					if (($class_name = substr($namespace, 0, -1))
+
+						and class_exists($class_name))
+					{
+						$this->module = $module_index;
+
+						$this->controller = array_pop($controller_fragments);
+						
+						$this->path = $controller_fragments;
+						
+					}
+				}
+
+				if (is_null($this->controller))
+				{
+					// Look-up all available namespace for matching controller
+					foreach (Juriya::$ns as $ns)
+					{
+						if (($class_name = $ns . 'controllers\\' . implode('\\', $arguments))
+
+						     and class_exists($class_name))
+					    {
+					    	// The request arguments already contain valid controller
+					    	$fragments = new Data(explode('\\', $class_name));
+
+					    	$this->controller = ucfirst($fragments->last());
+
+					    	continue;
+					    }
+					}
 				}
 			}
 		}

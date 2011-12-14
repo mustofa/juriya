@@ -3,7 +3,7 @@
 /**
  * Juriya - RAD PHP 5 Micro Framework
  *
- * Base View
+ * Request class
  *
  * @package  Juriya
  * @category Core Class
@@ -18,6 +18,33 @@ class Request {
 	 */
 	public $routes;
 
+	function __construct()
+	{
+		include_once PATH_SYS . PATH_CLASS . 'Controller' . EXT;
+	}
+
+	/**
+	 * Manufacturing Controller
+	 *
+	 * @access  public
+	 * @param   string  controller name
+	 * @return  object  controller interface
+	 */
+	public static function factory($controller)
+	{
+		foreach (Juriya::$ns as $ns)
+		{
+			if (($class_name = $ns . 'controllers\\'.$controller)
+
+			     and class_exists($class_name))
+		    {
+		    	return new $class_name;
+		    }
+		}
+
+		throw new \Exception('Controller not exists');
+	}
+
 	/**
 	 * Get request routes information
 	 *
@@ -26,7 +53,7 @@ class Request {
 	 */
 	public function route()
 	{
-		$this->routes = Juriya::factory('router')->detect();
+		$this->routes = Juriya::factory('Router')->detect();
 
 		return $this;
 	}
@@ -39,7 +66,9 @@ class Request {
 	 */
 	public function execute()
 	{
-		$controller = Juriya::factory($this->routes->controller);
+		$path = is_array($this->routes->path) ? implode('\\', $this->routes->path) : '';
+
+		$controller = self::factory($path . $this->routes->controller);
 		
 		$executor = $this->routes->executor;
 

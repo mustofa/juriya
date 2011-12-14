@@ -17,6 +17,10 @@ define('PATH_SYS',    realpath($system) . DIRECTORY_SEPARATOR);
 
 define('EXT',         '.php');
 
+define('NS_APP',      '\\application\\classes\\');
+
+define('NS_SYS',      '\\system\\classes\\');
+
 unset($environment, $application, $modules, $system);
 
 /**
@@ -28,13 +32,13 @@ require PATH_SYS . PATH_CLASS . 'juriya' . EXT;
 
 set_time_limit(300);
 
-spl_autoload_register('system\classes\Juriya::autoload');
+spl_autoload_register('\\system\\classes\\Juriya::autoload');
 
 set_exception_handler(function($e) {
 
 	require_once PATH_SYS . PATH_CLASS . 'exception' . EXT;
 
-	$handler = new system\classes\Exception($e);
+	$handler = new \system\classes\Exception($e);
 
 	$handler->handle();
 
@@ -61,10 +65,13 @@ if (is_dir($config) and ($config_files = scandir($config)))
 		}
 	}
 
-	system\classes\Juriya::configure($config_array);
+	\system\classes\Juriya::configure($config_array);
 
 	unset($config_array);
 }
+
+// Set reserved name
+use \system\classes\Juriya;
 
 /**
  *---------------------------------------------------------------

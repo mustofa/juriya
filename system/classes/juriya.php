@@ -34,6 +34,16 @@ class Juriya {
 	public static $method = 'HTTP';
 
 	/**
+	 * @var array Namespaces
+	 */
+	public static $ns;
+
+	/**
+	 * @var array Paths
+	 */
+	public static $path;
+
+	/**
 	 * @var string Temporary data
 	 */
 	public static $temp = NULL;
@@ -68,7 +78,7 @@ class Juriya {
 	public function execute()
 	{
 		// Create a new request and output the response
-		$instance = new Request();
+		$instance = self::factory('Request');
 
 		return $instance->route()->execute();
 	}
@@ -81,7 +91,7 @@ class Juriya {
 	 */
 	public static function configure($config)
 	{
-		self::$config = new types\Arr();
+		self::$config = self::factory('Data');
 
 		// Lifted and populate all configuration
 		$config = array_map(function ($item) use (&$config) {
@@ -117,9 +127,13 @@ class Juriya {
 
 		}, $config);
 
-		foreach (self::$config['ALIASES'] as $alias => $fullname)
+		// Only set if the aliases is enabled
+		if (self::$config->get('ALIASES.classes_alias') == '1')
 		{
-			class_alias($fullname, $alias);
+			foreach (self::$config->get('ALIASES.classes') as $alias => $fullname)
+			{
+				class_alias($fullname, $alias);
+			}
 		}
 	}
 
@@ -154,81 +168,60 @@ class Juriya {
 	 */
 	public static function autoload($class)
 	{
-		// Build namespace definition
-		$ns_fragments = self::ns($class, NULL, FALSE);
-
-		// Determine class types
-		switch(self::ns($class, 1))
+		// Register namespaces
+		if (self::initStatus() and self::$config->get('MODULES'))
 		{
-			case '':
+			$namespaces = array(NS_APP) and $paths = array(PATH_APP);
 
-			case 'classes':
+			$modules = self::$config->get('MODULES');
+			
+			foreach ($modules as $module => $params)
+			{
+				$namespaces[] = '\\' . $params['namespace'] . '\\';
 
-				if (count($ns_fragments) > 3)
-				{
-					$i = 1;
+				$paths[] = $params['path'];
+			}
 
-					$class_type = '';
+			$namespaces[] = NS_SYS and $paths[] = PATH_SYS;
 
-					foreach ($ns_fragments as $fragment)
-					{
-						if ($i < count($ns_fragments) - 1) 
-						{
-							$class_type .= $ns_fragments[$i] . DIRECTORY_SEPARATOR;
-						}
+			self::$ns = new Data($namespaces) and self::$path = new Data($paths);
+			
+		}
+		elseif (self::$ns instanceof Data and self::$path instanceof Data)
+		{
+			$namespaces = self::$ns->get() and $paths = self::$path->get();
+		}
+		else
+		{
+			$namespaces = array(NS_APP, NS_SYS);
 
-						$i++;
-					}
-				}
-				else
-				{
-					$class_type = PATH_CLASS;
-				}
-				
-				break;
-
-			default:
-
-				array_shift($ns_fragments) and array_pop($ns_fragments);
-
-				$class_type = implode(DIRECTORY_SEPARATOR, $ns_fragments) . DIRECTORY_SEPARATOR;
+			$paths = array(PATH_APP, PATH_SYS);
 		}
 
-		// Parse namespace from class name
-		$class_name = (strpos($class, '\\') === FALSE) ? $class : self::ns($class);
+		// Strip out the namespaces
+		$class_name = str_replace($namespaces, '', $class);
+
+		$class_name = str_replace('\\', DIRECTORY_SEPARATOR, $class_name);
 		
+		$loaded = FALSE;
+
 		// Itterate over provided paths and include if the class exists
-		foreach (array(PATH_APP, PATH_MOD, PATH_SYS) as $path)
+		foreach ($paths as $path)
 		{
-			$file = $path . $class_type . strtolower($class_name) . EXT;
+			$file = $path . PATH_CLASS . strtolower($class_name) . EXT;
 
 			if (($class_file = $file) and file_exists($class_file))
 			{
-				return include_once $class_file;
+				include_once $file;
+
+				$loaded = TRUE;
+				//die;
+				continue;
+				//return include_once $class_file;;
 			}
 		}
 
-		throw new \Exception('File not exists');
-	}
-
-	/**
-	 * Parse namespace
-	 *
-	 * @access  public
-	 * @param   string  namespace
-	 * @param   int     fragment index
-	 * @return  string  namespace fragment
-	 */
-	public static function ns($namespace, $index = NULL, $pop = TRUE)
-	{
-		// Parse namespace and return a fragment
-		$fragments = explode('\\', $namespace);
-
-		if ( ! $pop and is_null($index)) return $fragments;
-
-		end($fragments) and $last_index = key($fragments);
-
-		return (is_null($index)) ? $fragments[$last_index] : $fragments[$index];
+		//if ( ! $loaded) throw new \Exception('File not exists');
 	}
 
 	/**
@@ -236,68 +229,17 @@ class Juriya {
 	 *
 	 * @access  public
 	 * @param   string  class name
-	 * @param   string  component type (`MODEL`, `VIEW`, `CONTROLLER`) or (`APP`, `MOD`)
+	 * @param   mixed   constructor parameters
 	 * @return  object  class instance
 	 */
-	public static function factory($class, $type = null)
+	public static function factory($class, $params = null)
 	{
-		// Catch type annotation and determine appropriate namespace
-		if ( ! is_null($type))
+		foreach (array(NS_APP, NS_SYS) as $namespace)
 		{
-			switch($type)
+			if (($class_name = $namespace . $class) and class_exists($class_name))
 			{
-				case 'MODEL':
-
-					$ns = 'application\\models\\';
-
-					break;
-
-				case 'VIEW':
-
-					$ns = 'application\\views\\';
-
-					break;
-
-				case 'CONTROLLER':
-
-					$ns = 'application\\controllers\\';
-
-					break;
-
-				case 'APP':
-
-					$ns = 'application\\classes\\';
-
-					break;
-
-				case 'MOD':
-
-					$ns = 'modules\\classes\\';
-
-					break;
-
-				default:
-
-					$ns = 'system\\classes\\';
+				return (is_null($params)) ? new $class_name : new $class_name($params);
 			}
-
-			// Return requested class either contain namespace or not
-			if (($class_name = $class) and class_exists($class_name))
-			{
-				return new $class_name;
-			}
-			elseif(($class_name = $ns . ucfirst(self::ns($class))) and class_exists($class_name))
-			{
-				return new $class_name;
-			}
-			elseif(($class_name = self::ns($class)) and class_exists($class_name))
-			{
-				return new $class_name;
-			}
-		}
-		else
-		{
-			if (class_exists($class)) return new $class;
 		}
 
 		throw new \Exception('Class not exists');
