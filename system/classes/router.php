@@ -121,13 +121,7 @@ class Router {
 
 								  . $routes['default']['controller'];
 			}
-			elseif (($controller_name = $controller_ns . implode('\\', $arguments))
-
-					and class_exists($controller_name))
-			{
-				// The request arguments already contain valid controller
-				$this->controller = $controller_name;
-			}
+			
 			else
 			{
 				// Iterate each routes and find matching pattern
@@ -144,6 +138,16 @@ class Router {
 
 						continue;
 					}
+				}
+
+				if (is_null($this->controller)
+
+					and ($controller_name = $controller_ns . implode('\\', $arguments))
+
+					and class_exists($controller_name))
+				{
+					// The request arguments already contain valid controller
+					$this->controller = $controller_name;
 				}
 			}
 		}
