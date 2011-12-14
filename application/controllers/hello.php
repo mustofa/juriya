@@ -1,6 +1,6 @@
 <?php namespace application\controllers;
 
-class Hello extends \Controller{
+class Hello implements \Controller{
 	
 	public function executeHTTP()
 	{

@@ -68,4 +68,51 @@ class Arr implements \ArrayAccess{
     {
         unset($this->_collections[$offset]);
     }
+
+    /**
+     * Assign a collection data
+     *
+     * @access  public
+     * @param   mixed   Collection key
+     * @param   mixed   Collection values
+     * @return  void
+     */
+    public function addCollection($key, $value) 
+    {
+        // If the key are arrays build associative array, otherwise build one level array
+        if (is_array($key))
+        {
+            switch(count($key))
+            {
+                case 1:
+
+                    $this->_collections[$key[0]] = $value;
+
+                    break;
+
+                case 2:
+
+                    $this->_collections[$key[0]][$key[1]] = $value;
+
+                    break;
+
+                case 3:
+
+                    $this->_collections[$key[0]][$key[1]][$key[2]] = $value;
+
+                    break;
+
+                case 4:
+
+                    $this->_collections[$key[0]][$key[1]][$key[2]][$key[3]] = $value;
+
+                    break;
+            }
+            
+        }
+        else
+        {
+            $this->_collections[$key] = $value;
+        }
+    }
 }

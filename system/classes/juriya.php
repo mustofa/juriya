@@ -34,6 +34,11 @@ class Juriya {
 	public static $method = 'HTTP';
 
 	/**
+	 * @var string Temporary data
+	 */
+	public static $temp = NULL;
+
+	/**
 	 * @var boolean Juriya initialization status
 	 */
 	private static $init = FALSE;
@@ -85,7 +90,28 @@ class Juriya {
 
 		    $index = key($item);
 
-		    Juriya::$config[$index] = array_shift($item);
+		    $values = $item;
+
+		    Juriya::$temp = $index;
+
+		    $values = array_map(function ($sub_items) use (&$values) {
+
+		    	next($values);
+
+		    	$index = Juriya::$temp;
+
+		    	foreach ($sub_items as $sub_index => $sub_item)
+		    	{
+		    		$index = (array) Juriya::$temp;
+
+		    		$keys = explode('.', $sub_index);
+
+		    		Juriya::$config->addCollection(array_merge($index, $keys), $sub_item);
+		    	}
+
+		    }, $values);
+
+		    Juriya::$temp = NULL;
 
 		    return FALSE;
 
@@ -206,65 +232,72 @@ class Juriya {
 	}
 
 	/**
-	 * Manufacturing a system object
+	 * Manufacturing Juriya object
 	 *
 	 * @access  public
 	 * @param   string  class name
-	 * @param   string  component type (`M`, `V`, `C`) or (`APP`, `MOD`)
+	 * @param   string  component type (`MODEL`, `VIEW`, `CONTROLLER`) or (`APP`, `MOD`)
 	 * @return  object  class instance
 	 */
 	public static function factory($class, $type = null)
 	{
 		// Catch type annotation and determine appropriate namespace
-		switch($type)
+		if ( ! is_null($type))
 		{
-			case 'M':
+			switch($type)
+			{
+				case 'MODEL':
 
-				$ns = 'application\\models\\';
+					$ns = 'application\\models\\';
 
-				break;
+					break;
 
-			case 'V':
+				case 'VIEW':
 
-				$ns = 'application\\views\\';
+					$ns = 'application\\views\\';
 
-				break;
+					break;
 
-			case 'C':
+				case 'CONTROLLER':
 
-				$ns = 'application\\controllers\\';
+					$ns = 'application\\controllers\\';
 
-				break;
+					break;
 
-			case 'APP':
+				case 'APP':
 
-				$ns = 'application\\classes\\';
+					$ns = 'application\\classes\\';
 
-				break;
+					break;
 
-			case 'MOD':
+				case 'MOD':
 
-				$ns = 'modules\\classes\\';
+					$ns = 'modules\\classes\\';
 
-				break;
+					break;
 
-			default:
+				default:
 
-				$ns = 'system\\classes\\';
+					$ns = 'system\\classes\\';
+			}
+
+			// Return requested class either contain namespace or not
+			if (($class_name = $class) and class_exists($class_name))
+			{
+				return new $class_name;
+			}
+			elseif(($class_name = $ns . ucfirst(self::ns($class))) and class_exists($class_name))
+			{
+				return new $class_name;
+			}
+			elseif(($class_name = self::ns($class)) and class_exists($class_name))
+			{
+				return new $class_name;
+			}
 		}
-
-		// Return requested class either contain namespace or not
-		if (($class_name = $class) and class_exists($class_name))
+		else
 		{
-			return new $class_name;
-		}
-		elseif(($class_name = $ns . ucfirst(self::ns($class))) and class_exists($class_name))
-		{
-			return new $class_name;
-		}
-		elseif(($class_name = self::ns($class)) and class_exists($class_name))
-		{
-			return new $class_name;
+			if (class_exists($class)) return new $class;
 		}
 
 		throw new \Exception('Class not exists');

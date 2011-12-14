@@ -3,7 +3,7 @@
 /**
  * Juriya - RAD PHP 5 Micro Framework
  *
- * Base Controller
+ * Base Controller interface
  *
  * @package  Juriya
  * @category Core Class
@@ -11,11 +11,22 @@
  * @author   Taufan Aditya
  */
 
-class Controller {
+interface Controller {
 
 	/**
-	 * @var object Outpot stream
+	 * All controller classes must have HTTP execute method
+	 * 
+	 * @access public
+	 * @return string
 	 */
-	protected $output;
+	public function executeHTTP();
+
+	/**
+	 * All controller classes must have CLI execute method
+	 * 
+	 * @access public
+	 * @return string
+	 */
+	public function executeCLI();
 	
 }

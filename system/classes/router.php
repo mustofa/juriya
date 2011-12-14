@@ -108,8 +108,46 @@ class Router {
 
 		}, $arguments);
 
-		$this->controller = 'application\\controllers\\' . implode('\\', ($arguments));
-		
+		// Set controller namespace
+		$controller_ns = 'application\\controllers\\';
+
+		// Check the routes configuration against the arguments
+		if (FALSE !== ($routes = Juriya::$config['ROUTES']))
+		{
+			if (empty($arguments))
+			{
+				// Get the default route
+				$this->controller = $controller_ns 
+
+								  . $routes['default']['controller'];
+			}
+			elseif (($controller_name = $controller_ns . implode('\\', $arguments))
+
+					and class_exists($controller_name))
+			{
+				// The request arguments already contain valid controller
+				$this->controller = $controller_name;
+			}
+			else
+			{
+				// Iterate each routes and find matching pattern
+				foreach ($routes as $route_name => $route)
+				{
+					if (($intersection = array_intersect($arguments, $route['arguments'])) 
+
+						and $arguments == $intersection )
+					{
+						// Set match controller
+						$this->controller = $controller_ns
+
+										  . $routes[$route_name]['controller'];
+
+						continue;
+					}
+				}
+			}
+		}
+
 		return $this;
 	}
 

@@ -39,12 +39,12 @@ class Request {
 	 */
 	public function execute()
 	{
-		$controller = Juriya::factory($this->routes->controller, 'C');
+		$controller = Juriya::factory($this->routes->controller);
 		
 		$executor = $this->routes->executor;
 
 		$response = $controller->$executor();
 
-		return $this;
+		return $response;
 	}
 }

@@ -5,17 +5,19 @@
  * Set framework paths and main constants.
  *---------------------------------------------------------------
  */
-define('PATH_APP', realpath($application) . DIRECTORY_SEPARATOR);
+define('ENVIRONMENT', $environment);
 
-define('PATH_MOD', realpath($modules) . DIRECTORY_SEPARATOR);
+define('PATH_CLASS',  'classes' . DIRECTORY_SEPARATOR);
 
-define('PATH_SYS', realpath($system) . DIRECTORY_SEPARATOR);
+define('PATH_APP',    realpath($application) . DIRECTORY_SEPARATOR);
 
-define('PATH_CLASS', 'classes' . DIRECTORY_SEPARATOR);
+define('PATH_MOD',    realpath($modules) . DIRECTORY_SEPARATOR);
 
-define('EXT', '.php');
+define('PATH_SYS',    realpath($system) . DIRECTORY_SEPARATOR);
 
-unset($application, $modules, $system);
+define('EXT',         '.php');
+
+unset($environment, $application, $modules, $system);
 
 /**
  *---------------------------------------------------------------
@@ -43,7 +45,6 @@ set_exception_handler(function($e) {
  * Load configuration and set appropriate behaviour
  *---------------------------------------------------------------
  */
-
 $config = PATH_APP . 'config' . DIRECTORY_SEPARATOR;
 
 if (is_dir($config) and ($config_files = scandir($config)))
