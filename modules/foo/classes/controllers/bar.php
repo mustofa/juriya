@@ -1,4 +1,4 @@
-<?php namespace modules\foo\classes\controllers;
+<?php namespace Mod\Foo\Controllers;
 
 /**
  * Juriya - RAD PHP 5 Micro Framework
@@ -11,7 +11,7 @@
  * @author   Taufan Aditya
  */
 
-class Bar implements \system\classes\Controller {
+class Bar extends \Juriya\Controller {
 	
 	/**
 	 * Serve HTTP execute method

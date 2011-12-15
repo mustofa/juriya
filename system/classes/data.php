@@ -1,4 +1,4 @@
-<?php namespace system\classes;
+<?php namespace Juriya;
 
 /**
  * Juriya - RAD PHP 5 Micro Framework
@@ -296,5 +296,16 @@ class Data implements \ArrayAccess, \Iterator, \Countable {
         {
             $this->_collections[$key] = $value;
         }
+    }
+
+    /**
+     * Sorting collection Descending
+     *
+     * @access  public
+     * @return  int
+     */
+    public function ksortDesc() 
+    {
+        krsort($this->_collections);
     }
 }

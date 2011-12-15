@@ -3,7 +3,7 @@
 /**
  * Juriya - RAD PHP 5 Micro Framework
  *
- * Base Controller interface
+ * Socket interface
  *
  * @package  Juriya
  * @category Core Class
@@ -11,28 +11,22 @@
  * @author   Taufan Aditya
  */
 
-class Controller implements Socket{
+interface Socket {
 
 	/**
-	 * Empty response
+	 * All socket classes must have HTTP execute method
 	 * 
 	 * @access public
 	 * @return string
 	 */
-	public function executeHTTP()
-	{
-		echo 'Empty Response';
-	}
+	public function executeHTTP();
 
 	/**
-	 * Empty response
+	 * All socket classes must have CLI execute method
 	 * 
 	 * @access public
 	 * @return string
 	 */
-	public function executeCLI()
-	{
-		echo 'Empty Response';
-	}
+	public function executeCLI();
 	
 }

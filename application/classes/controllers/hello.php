@@ -1,4 +1,4 @@
-<?php namespace application\classes\controllers;
+<?php namespace App\Controllers;
 
 /**
  * Juriya - RAD PHP 5 Micro Framework
@@ -11,7 +11,7 @@
  * @author   Taufan Aditya
  */
 
-class Hello implements \system\classes\Controller{
+class Hello extends \Juriya\Controller{
 	
 	/**
 	 * Serve HTTP execute method
@@ -21,6 +21,18 @@ class Hello implements \system\classes\Controller{
 	 */
 	public function executeHTTP()
 	{
+		// require PATH_APP . PATH_CLASS . 'juriya' . EXT;
+
+		// $mockupAccident = new \App\Juriya();
+
+		// $mockupAccident->say();
+
+		// require PATH_APP . PATH_CLASS . 'controller' . EXT;
+
+		// $mockupAccident = new \Controller();
+
+		// $mockupAccident->say();
+		
 		echo 'Hello World';
 	}
 

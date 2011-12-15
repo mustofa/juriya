@@ -1,4 +1,4 @@
-<?php namespace system\classes;
+<?php namespace Juriya;
 
 /**
  * Juriya - RAD PHP 5 Micro Framework
@@ -20,7 +20,7 @@ class Request {
 
 	function __construct()
 	{
-		include_once PATH_SYS . PATH_CLASS . 'Controller' . EXT;
+		include_once PATH_SYS . PATH_CLASS . 'controller' . EXT;
 	}
 
 	/**
@@ -34,7 +34,7 @@ class Request {
 	{
 		foreach (Juriya::$ns as $ns)
 		{
-			if (($class_name = $ns . 'controllers\\'.$controller)
+			if (($class_name = $ns . 'Controllers\\'.$controller)
 
 			     and class_exists($class_name))
 		    {

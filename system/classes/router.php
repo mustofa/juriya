@@ -1,4 +1,4 @@
-<?php namespace system\classes;
+<?php namespace Juriya;
 
 /**
  * Juriya - RAD PHP 5 Micro Framework
@@ -150,7 +150,7 @@ class Router {
 
 					$iterator = $array->getIterator();
 
-					$namespace = '\\modules\\' . $iterator->current() . '\\classes\\controllers\\';
+					$namespace = '\\Mod\\' . ucfirst($iterator->current()) . '\\Controllers\\';
 
 					$module = $iterator->current();
 
@@ -184,7 +184,7 @@ class Router {
 					// Look-up all available namespace for matching controller
 					foreach (Juriya::$ns as $ns)
 					{
-						if (($class_name = $ns . 'controllers\\' . implode('\\', $arguments))
+						if (($class_name = $ns . 'Controllers\\' . implode('\\', $arguments))
 
 						     and class_exists($class_name))
 					    {

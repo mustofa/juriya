@@ -17,9 +17,9 @@ define('PATH_SYS',    realpath($system) . DIRECTORY_SEPARATOR);
 
 define('EXT',         '.php');
 
-define('NS_APP',      '\\application\\classes\\');
+define('NS_APP',      '\\App\\');
 
-define('NS_SYS',      '\\system\\classes\\');
+define('NS_SYS',      '\\Juriya\\');
 
 unset($environment, $application, $modules, $system);
 
@@ -28,19 +28,31 @@ unset($environment, $application, $modules, $system);
  * Set framework environment and appropriate handler.
  *---------------------------------------------------------------
  */
-require PATH_SYS . PATH_CLASS . 'juriya' . EXT;
+require_once PATH_SYS . PATH_CLASS . 'juriya' . EXT;
+
+require_once PATH_SYS . PATH_CLASS . 'logger' . EXT;
+
+require_once PATH_SYS . PATH_CLASS . 'lib' . DIRECTORY_SEPARATOR . 'socket' . EXT;
 
 set_time_limit(300);
-
-spl_autoload_register('\\system\\classes\\Juriya::autoload');
 
 set_exception_handler(function($e) {
 
 	require_once PATH_SYS . PATH_CLASS . 'exception' . EXT;
 
-	$handler = new \system\classes\Exception($e);
+	$handler = new \Juriya\Exception($e);
 
 	$handler->handle();
+
+});
+
+spl_autoload_register('\\Juriya\\Juriya::autoload');
+
+register_shutdown_function(function() {
+
+	\Juriya\Logger::stop('Juriya\\Juriya');
+
+	\Juriya\Logger::report('Juriya\\Juriya');
 
 });
 
@@ -65,19 +77,18 @@ if (is_dir($config) and ($config_files = scandir($config)))
 		}
 	}
 
-	\system\classes\Juriya::configure($config_array);
+	\Juriya\Juriya::configure($config_array);
 
 	unset($config_array);
 }
-
-// Set reserved name
-use \system\classes\Juriya;
 
 /**
  *---------------------------------------------------------------
  * Launch program.
  *---------------------------------------------------------------
  */
+use \Juriya\Juriya;
+
 $launcher = new Juriya();
 
 $launcher->execute();

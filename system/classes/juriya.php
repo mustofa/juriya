@@ -1,4 +1,4 @@
-<?php namespace system\classes;
+<?php namespace Juriya;
 
 /**
  * Juriya - RAD PHP 5 Micro Framework
@@ -51,7 +51,7 @@ class Juriya {
 	/**
 	 * @var boolean Juriya initialization status
 	 */
-	private static $init = FALSE;
+	private static $_init = FALSE;
 
 	/**
 	 * Constructor
@@ -145,7 +145,9 @@ class Juriya {
 	 */
 	public static function init()
 	{
-		self::$init = TRUE;
+		Logger::start(__CLASS__);
+
+		self::$_init = TRUE;
 	}
 
 	/**
@@ -156,7 +158,7 @@ class Juriya {
 	 */
 	public static function initStatus()
 	{
-		return self::$init;
+		return self::$_init;
 	}
 	
 	/**
@@ -168,36 +170,9 @@ class Juriya {
 	 */
 	public static function autoload($class)
 	{
-		// Register namespaces
-		if (self::initStatus() and self::$config->get('MODULES'))
-		{
-			$namespaces = array(NS_APP) and $paths = array(PATH_APP);
-
-			$modules = self::$config->get('MODULES');
-			
-			foreach ($modules as $module => $params)
-			{
-				$namespaces[] = '\\' . $params['namespace'] . '\\';
-
-				$paths[] = $params['path'];
-			}
-
-			$namespaces[] = NS_SYS and $paths[] = PATH_SYS;
-
-			self::$ns = new Data($namespaces) and self::$path = new Data($paths);
-			
-		}
-		elseif (self::$ns instanceof Data and self::$path instanceof Data)
-		{
-			$namespaces = self::$ns->get() and $paths = self::$path->get();
-		}
-		else
-		{
-			$namespaces = array(NS_APP, NS_SYS);
-
-			$paths = array(PATH_APP, PATH_SYS);
-		}
-
+		// Fetch namespaces and paths
+		list($namespaces, $paths) = self::_namespacePath();
+		
 		// Strip out the namespaces
 		$class_name = str_replace($namespaces, '', $class);
 
@@ -215,13 +190,12 @@ class Juriya {
 				include_once $file;
 
 				$loaded = TRUE;
-				//die;
+
 				continue;
-				//return include_once $class_file;;
 			}
 		}
 
-		//if ( ! $loaded) throw new \Exception('File not exists');
+		if ( ! $loaded) throw new \Exception('File not exists');
 	}
 
 	/**
@@ -234,13 +208,18 @@ class Juriya {
 	 */
 	public static function factory($class, $params = null)
 	{
-		foreach (array(NS_APP, NS_SYS) as $namespace)
+		// Fetch namespaces and paths
+		list($namespaces, $paths) = self::_namespacePath();
+
+		foreach ($namespaces as $namespace)
 		{
 			if (($class_name = $namespace . $class) and class_exists($class_name))
 			{
 				return (is_null($params)) ? new $class_name : new $class_name($params);
 			}
 		}
+
+		if (class_exists($class)) return new $class;
 
 		throw new \Exception('Class not exists');
 	}
@@ -434,5 +413,46 @@ class Juriya {
 					
 				. htmlspecialchars(print_r($var, TRUE), ENT_NOQUOTES, 'utf-8');
 		}
+	}
+
+	/**
+	 * Register namespace and paths
+	 *
+	 * @access	protected
+	 * @return	array 
+	 */
+	protected static function _namespacePath()
+	{
+		// Register namespaces
+		if (self::initStatus() and self::$config->get('MODULES'))
+		{
+			$namespaces = array(NS_APP) and $paths = array(PATH_APP);
+
+			$modules = self::$config->get('MODULES');
+			
+			foreach ($modules as $module => $params)
+			{
+				$namespaces[] = '\\' . $params['namespace'] . '\\';
+
+				$paths[] = $params['path'];
+			}
+
+			$namespaces[] = NS_SYS and $paths[] = PATH_SYS;
+
+			self::$ns = new Data($namespaces) and self::$path = new Data($paths);
+			
+		}
+		elseif (self::$ns instanceof Data and self::$path instanceof Data)
+		{
+			$namespaces = self::$ns->get() and $paths = self::$path->get();
+		}
+		else
+		{
+			$namespaces = array(NS_APP, NS_SYS);
+
+			$paths = array(PATH_APP, PATH_SYS);
+		}
+
+		return array($namespaces, $paths);
 	}
 }

@@ -1,4 +1,4 @@
-<?php namespace system\classes;
+<?php namespace Juriya;
 
 /**
  * Juriya - RAD PHP 5 Micro Framework
