@@ -43,4 +43,4 @@ $modules = 'modules';
 $system = 'system';
 
 // Launch
-require $system.DIRECTORY_SEPARATOR.'launcher.php';
+require $system . DIRECTORY_SEPARATOR . 'launcher.php';
