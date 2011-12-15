@@ -14,6 +14,15 @@
 class Logger {
 
 	/**
+	 * @var array Logger code
+	 */
+	public static $code = array(
+		1 => 'INFO',
+		2 => 'WARNING',
+		3 => 'ERROR',
+	);
+
+	/**
 	 * @var array Profiler log
 	 */
 	public static $profiler;
@@ -32,14 +41,36 @@ class Logger {
 	 * Report all logger data with appropriate output
 	 *
 	 * @access  public
-	 * @param   string
+	 * @param   mixed
 	 * @return  mixed
 	 */
-	public static function report($identifier)
+	public static function report($identifier = NULL)
 	{
-		self::$profiler[$identifier]->ksortDesc();
+		if (is_null($identifier))
+		{
+			echo Juriya::debug(self::$profiler, self::$log);
+		}
+		else
+		{
+			self::$profiler[$identifier]->ksortDesc();
+			echo Juriya::debug(self::$profiler[$identifier], self::$log[$identifier]);
+		}
+	}
 
-		echo Juriya::debug(self::$profiler[$identifier]);
+	/**
+	 * Write a log
+	 *
+	 * @access  public
+	 * @param   string
+	 * @return  void
+	 */
+	public static function write($identifier, $msg = 'Empty message.', $code = 0)
+	{
+		self::check($identifier);
+		$key = date('H:i:s', time());
+		$code = isset(self::$code[$code]) ? self::$code[$code] : 'UNKNOWN';
+		$log = '[' . str_pad($code, 7, ' ', STR_PAD_BOTH) . '] ' . $msg;
+		self::$log[$identifier][] = array($key => $log);
 	}
 
 	/**
@@ -52,9 +83,7 @@ class Logger {
 	public static function start($identifier)
 	{
 		self::check($identifier);
-
 		self::$profiler[$identifier]['time_start'] = microtime(TRUE);
-
 		self::$profiler[$identifier]['memory_start'] = memory_get_usage(TRUE);
 	}
 
@@ -68,12 +97,17 @@ class Logger {
 	public static function stop($identifier)
 	{
 		self::check($identifier);
+		$pointers = array('time', 'memory');
+		$values = array(microtime(TRUE), memory_get_usage(TRUE));
+		Juriya::$temp = $identifier;
 
-		$end = self::$profiler[$identifier]['time_end'] = microtime(TRUE);
-
-		self::$profiler[$identifier]['time_elapsed'] = $end - self::$profiler[$identifier]['time_start'];
-
-		self::$profiler[$identifier]['memory_end'] = memory_get_usage(TRUE);
+		array_map(function($pointer, $value) 
+		{
+			$start = Logger::$profiler[Juriya::$temp][$pointer . '_start'];
+			$elapsed = $value - $start;
+			Logger::$profiler[Juriya::$temp]->add($pointer . '_end', $value);
+			Logger::$profiler[Juriya::$temp]->add($pointer . '_elapsed', $elapsed);
+		}, $pointers, $values);
 	}
 
 	/**
@@ -85,11 +119,13 @@ class Logger {
 	 */
 	public static function check($identifier)
 	{
-		if (self::$_init == FALSE)
+		if (self::$_init == FALSE or is_null(self::$profiler[$identifier]))
 		{
-			self::$_init = TRUE 
+			self::$_init = TRUE
+			and self::$profiler[$identifier] = new Data()
+			and self::$log[$identifier] = new Data();
 
-			and self::$log[$identifier] = self::$profiler[$identifier] = new Data();
+			return;
 		}
 	}
 }

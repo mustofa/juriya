@@ -38,4 +38,9 @@ class Exception {
 	{
 		echo Juriya::debug($this->exception);
 	}
+
+	public function log()
+	{
+		return var_export($this->exception, TRUE);
+	}
 }

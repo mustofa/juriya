@@ -35,7 +35,6 @@ class Request {
 		foreach (Juriya::$ns as $ns)
 		{
 			if (($class_name = $ns . 'Controllers\\'.$controller)
-
 			     and class_exists($class_name))
 		    {
 		    	return new $class_name;
@@ -67,11 +66,8 @@ class Request {
 	public function execute()
 	{
 		$path = is_array($this->routes->path) ? implode('\\', $this->routes->path) : '';
-
 		$controller = self::factory($path . $this->routes->controller);
-		
 		$executor = $this->routes->executor;
-
 		$response = $controller->$executor();
 
 		return $response;

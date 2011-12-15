@@ -94,18 +94,16 @@ class Juriya {
 		self::$config = self::factory('Data');
 
 		// Lifted and populate all configuration
-		$config = array_map(function ($item) use (&$config) {
-
+		$config = array_map(function ($item) use (&$config) 
+		{
 		    next($config);
 
 		    $index = key($item);
-
 		    $values = $item;
-
 		    Juriya::$temp = $index;
 
-		    $values = array_map(function ($sub_items) use (&$values) {
-
+		    $values = array_map(function ($sub_items) use (&$values) 
+		    {
 		    	next($values);
 
 		    	$index = Juriya::$temp;
@@ -113,10 +111,8 @@ class Juriya {
 		    	foreach ($sub_items as $sub_index => $sub_item)
 		    	{
 		    		$index = (array) Juriya::$temp;
-
 		    		$keys = explode('.', $sub_index);
-
-		    		Juriya::$config->addCollection(array_merge($index, $keys), $sub_item);
+		    		Juriya::$config->add(array_merge($index, $keys), $sub_item);
 		    	}
 
 		    }, $values);
@@ -146,7 +142,6 @@ class Juriya {
 	public static function init()
 	{
 		Logger::start(__CLASS__);
-
 		self::$_init = TRUE;
 	}
 
@@ -172,12 +167,12 @@ class Juriya {
 	{
 		// Fetch namespaces and paths
 		list($namespaces, $paths) = self::_namespacePath();
-		
+	
 		// Strip out the namespaces
 		$class_name = str_replace($namespaces, '', $class);
-
 		$class_name = str_replace('\\', DIRECTORY_SEPARATOR, $class_name);
-		
+
+		// Set result pointer
 		$loaded = FALSE;
 
 		// Itterate over provided paths and include if the class exists
@@ -188,14 +183,13 @@ class Juriya {
 			if (($class_file = $file) and file_exists($class_file))
 			{
 				include_once $file;
-
 				$loaded = TRUE;
 
 				continue;
 			}
 		}
 
-		if ( ! $loaded) throw new \Exception('File not exists');
+		if ( ! $loaded) Logger::write(__CLASS__, $class . ' not found.', 2);
 	}
 
 	/**
@@ -211,6 +205,7 @@ class Juriya {
 		// Fetch namespaces and paths
 		list($namespaces, $paths) = self::_namespacePath();
 
+		// Itterate over the namespace and instantiate requested class
 		foreach ($namespaces as $namespace)
 		{
 			if (($class_name = $namespace . $class) and class_exists($class_name))
@@ -234,11 +229,13 @@ class Juriya {
 	{
 		if (func_num_args() === 0) return;
 
-		// Get all passed variables and dump into readable output
+		// Get all passed variables 
 		$vars = func_get_args();
 
+		// Set output pool
 		$output = array();
 		
+		// Itterate variables and dump into readable output
 		foreach ($vars as $var)
 		{
 			$output[] = (self::$method == 'CLI') ? var_export($var, TRUE) : self::dump($var, 1024);
@@ -252,8 +249,8 @@ class Juriya {
 	/**
 	 * Dump variable(s)
 	 *
-	 * @access	public
-	 * @param	mixed	the variable to dump
+	 * @access  public
+	 * @param   mixed   the variable to dump
 	 * @param   int     length
 	 * @param   int     depth level
 	 * @return	string  HTML chunk
@@ -293,11 +290,9 @@ class Juriya {
 		}
 		elseif (is_array($var))
 		{
-			$output = array();
-
 			// Indentation for this variable
+			$output = array();
 			$space = str_repeat($s = '    ', $level);
-
 			static $marker;
 
 			if ($marker === NULL)
@@ -317,7 +312,6 @@ class Juriya {
 			elseif ($level < 5)
 			{
 				$output[] = "<span>(";
-
 				$var[$marker] = TRUE;
 
 				foreach ($var as $key => &$val)
@@ -348,12 +342,10 @@ class Juriya {
 		{
 			// Copy the object as an array
 			$array = (array) $var;
-
 			$output = array();
 
 			// Indentation for this variable
 			$space = str_repeat($s = '    ', $level);
-
 			$hash = spl_object_hash($var);
 
 			// Objects that are being dumped
@@ -370,17 +362,14 @@ class Juriya {
 			elseif ($level < 10)
 			{
 				$output[] = "<code>{";
-
 				$objects[$hash] = TRUE;
 
 				foreach ($array as $key => &$val)
 				{
 					if ($key[0] === "\x00")
 					{
-						// Determine if the access is protected or protected
+						// Determine the access and remove the access level from the variable name
 						$access = '<small>'.($key[1] === '*' ? 'protected' : 'private').'</small>';
-
-						// Remove the access level from the variable name
 						$key = substr($key, strrpos($key, "\x00") + 1);
 					}
 					else
@@ -402,15 +391,12 @@ class Juriya {
 			}
 
 			return '<small>object</small>'
-
 				. '<span>' . get_class($var) . '(' . count($array) . ')</span> ' 
-
 				. implode("\n", $output);
 		}
 		else
 		{
 			return '<small>' . gettype($var) . '</small> '
-					
 				. htmlspecialchars(print_r($var, TRUE), ENT_NOQUOTES, 'utf-8');
 		}
 	}
@@ -424,23 +410,19 @@ class Juriya {
 	protected static function _namespacePath()
 	{
 		// Register namespaces
-		if (self::initStatus() and self::$config->get('MODULES'))
+		if (self::initStatus() and self::$config->get('MODULES') and is_null(self::$ns))
 		{
 			$namespaces = array(NS_APP) and $paths = array(PATH_APP);
-
 			$modules = self::$config->get('MODULES');
 			
 			foreach ($modules as $module => $params)
 			{
 				$namespaces[] = '\\' . $params['namespace'] . '\\';
-
 				$paths[] = $params['path'];
 			}
 
 			$namespaces[] = NS_SYS and $paths[] = PATH_SYS;
-
 			self::$ns = new Data($namespaces) and self::$path = new Data($paths);
-			
 		}
 		elseif (self::$ns instanceof Data and self::$path instanceof Data)
 		{
@@ -449,7 +431,6 @@ class Juriya {
 		else
 		{
 			$namespaces = array(NS_APP, NS_SYS);
-
 			$paths = array(PATH_APP, PATH_SYS);
 		}
 
