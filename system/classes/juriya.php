@@ -51,7 +51,7 @@ class Juriya {
 	/**
 	 * @var boolean Juriya initialization status
 	 */
-	private static $_init = FALSE;
+	private static $init = FALSE;
 
 	/**
 	 * Constructor
@@ -61,10 +61,8 @@ class Juriya {
 	function __construct()
 	{
 		// Initialize system once
-		if (self::initStatus() == FALSE)
-		{
-			if (defined('STDIN')) self::$method = 'CLI';
-
+		if (self::initStatus() == FALSE) {
+			defined('STDIN') and self::$method = 'CLI';
 			self::init();
 		}
 	}
@@ -72,7 +70,6 @@ class Juriya {
 	/**
 	 * Execute the program
 	 *
-	 * @access  public
 	 * @return  response  HTTP or CLI response
 	 */
 	public function execute()
@@ -86,48 +83,42 @@ class Juriya {
 	/**
 	 * Load configuration and configure system behaviour
 	 *
-	 * @access  public
 	 * @return  void
 	 */
-	public static function configure($config)
+	public static function configure($configs)
 	{
+		//  Instantiate new collection
 		self::$config = self::factory('Data');
 
 		// Lifted and populate all configuration
-		$config = array_map(function ($item) use (&$config) 
-		{
-		    next($config);
+		$configs = array_map(function ($item) use (&$configs) {
+		    next($configs);
+		    Juriya::$temp = $index = key($item)
+		    and $values   = $item;
 
-		    $index = key($item);
-		    $values = $item;
-		    Juriya::$temp = $index;
-
-		    $values = array_map(function ($sub_items) use (&$values) 
-		    {
+		    // Scan the level and inspect mathced cursor
+		    $values = array_map(function ($sub_items) use (&$values) {
 		    	next($values);
-
 		    	$index = Juriya::$temp;
 
-		    	foreach ($sub_items as $sub_index => $sub_item)
-		    	{
+		    	foreach ($sub_items as $sub_index => $sub_item) {
 		    		$index = (array) Juriya::$temp;
-		    		$keys = explode('.', $sub_index);
+		    		$keys  = explode('.', $sub_index);
 		    		Juriya::$config->add(array_merge($index, $keys), $sub_item);
 		    	}
-
 		    }, $values);
 
 		    Juriya::$temp = NULL;
 
 		    return FALSE;
+		}, $configs);
 
-		}, $config);
+		// Reset
+		unset($configs);
 
 		// Only set if the aliases is enabled
-		if (self::$config->get('ALIASES.classes_alias') == '1')
-		{
-			foreach (self::$config->get('ALIASES.classes') as $alias => $fullname)
-			{
+		if (self::$config->get('ALIASES.classes_alias') == '1') {
+			foreach (self::$config->get('ALIASES.classes') as $alias => $fullname) {
 				class_alias($fullname, $alias);
 			}
 		}
@@ -136,39 +127,35 @@ class Juriya {
 	/**
 	 * Set initialize status
 	 *
-	 * @access  public
 	 * @return  void
 	 */
 	public static function init()
 	{
+		// Start logger and turn on init status
 		Logger::start(__CLASS__);
-		self::$_init = TRUE;
+		self::$init = TRUE;
 	}
 
 	/**
 	 * Get initialize status
 	 *
-	 * @access  public
 	 * @return  boolean
 	 */
 	public static function initStatus()
 	{
-		return self::$_init;
+		return self::$init;
 	}
 	
 	/**
 	 * Autoloader
 	 *
-	 * @access  public
 	 * @param   string  class path
 	 * @return  mixed
 	 */
 	public static function autoload($class)
 	{
-		// Fetch namespaces and paths
+		// Fetch then strip out the namespaces from path
 		list($namespaces, $paths) = self::_namespacePath();
-	
-		// Strip out the namespaces
 		$class_name = str_replace($namespaces, '', $class);
 		$class_name = str_replace('\\', DIRECTORY_SEPARATOR, $class_name);
 
@@ -176,12 +163,10 @@ class Juriya {
 		$loaded = FALSE;
 
 		// Itterate over provided paths and include if the class exists
-		foreach ($paths as $path)
-		{
+		foreach ($paths as $path) {
 			$file = $path . PATH_CLASS . strtolower($class_name) . EXT;
 
-			if (($class_file = $file) and file_exists($class_file))
-			{
+			if (($class_file = $file) and file_exists($class_file)) {
 				include_once $file;
 				$loaded = TRUE;
 
@@ -189,15 +174,16 @@ class Juriya {
 			}
 		}
 
-		if ( ! $loaded) Logger::write(__CLASS__, $class . ' not found.', 2);
+		// Check result and log appropriate warning if not exist
+		$loaded or Logger::write(__CLASS__, $class . ' not found.', 2);
 	}
 
 	/**
 	 * Manufacturing Juriya object
 	 *
-	 * @access  public
 	 * @param   string  class name
 	 * @param   mixed   constructor parameters
+	 * @throws  object  Juriya Exception
 	 * @return  object  class instance
 	 */
 	public static function factory($class, $params = null)
@@ -206,50 +192,51 @@ class Juriya {
 		list($namespaces, $paths) = self::_namespacePath();
 
 		// Itterate over the namespace and instantiate requested class
-		foreach ($namespaces as $namespace)
-		{
-			if (($class_name = $namespace . $class) and class_exists($class_name))
-			{
+		foreach ($namespaces as $namespace) {
+			if (($class_name = $namespace . $class) 
+				 and class_exists($class_name)) {
 				return (is_null($params)) ? new $class_name : new $class_name($params);
 			}
 		}
 
-		if (class_exists($class)) return new $class;
+		// Return the class or throw exception
+		if (class_exists($class)) {
+			return new $class;
+		}
 
+		// throw Juriya expention
 		throw new \Exception('Class not exists');
 	}
 
 	/**
 	 * Debug variable(s)
 	 *
-	 * @access	public
 	 * @return	string  HTML chunk
 	 */
 	public static function debug()
 	{
-		if (func_num_args() === 0) return;
+		// Only start if there are passed variables
+		if (func_num_args() === 0) {
+			return;
+		};
 
 		// Get all passed variables 
-		$vars = func_get_args();
-
-		// Set output pool
+		$vars   = func_get_args();
 		$output = array();
 		
 		// Itterate variables and dump into readable output
-		foreach ($vars as $var)
-		{
+		foreach ($vars as $var) {
 			$output[] = (self::$method == 'CLI') ? var_export($var, TRUE) : self::dump($var, 1024);
 		}
 
+		// Prepare the output, then return appropriate result
 		$output = implode("\n", $output);
-
 		return (self::$method == 'CLI') ? $output : '<pre class="debug">' . $output . '</pre>';
 	}
 
 	/**
 	 * Dump variable(s)
 	 *
-	 * @access  public
 	 * @param   mixed   the variable to dump
 	 * @param   int     length
 	 * @param   int     depth level
@@ -257,69 +244,68 @@ class Juriya {
 	 */
 	public static function dump(&$var, $length = 128, $level = 0)
 	{
-		if ($var === NULL)
-		{
-			return '<small>NULL</small>';
+		$small = function($var) {
+			return '<small>' . $var . '</small>';
+		};
+
+		$span = function($var) {
+			return '<span>(' . $var . ')</span>';
+		};
+
+		if ($var === NULL) {
+			return $small('NULL');
 		}
-		elseif (is_bool($var))
-		{
-			return '<small>bool</small> ' . ($var ? 'TRUE' : 'FALSE');
+
+		if (is_bool($var)) {
+			return $small('bool') . ($var ? 'TRUE' : 'FALSE');
 		}
-		elseif (is_float($var))
-		{
-			return '<small>float</small> ' . $var;
+		
+		if (is_float($var)) {
+			return $small('float') . $var;
 		}
-		elseif (is_resource($var))
-		{
-			return '<small>resource</small><span>(' . $var . ')</span>';
+
+		if (is_resource($var)) {
+			return $small('resource') . $span($var);
 		}
-		elseif (is_string($var))
-		{
-			if (strlen($var) > $length)
-			{
+
+		if (is_string($var)) {
+			if (strlen($var) > $length) {
 				// Encode the truncated string
-				$str = htmlspecialchars(substr($var, 0, $length), ENT_NOQUOTES, 'utf-8') . '&nbsp;&hellip;';
-			}
-			else
-			{
+				$str = htmlspecialchars(substr($var, 0, $length), ENT_NOQUOTES, 'utf-8') 
+					. '&nbsp;&hellip;';
+			} else {
 				// Encode the string
 				$str = htmlspecialchars($var, ENT_NOQUOTES, 'utf-8');
 			}
 
-			return '<small>string</small><span>('.strlen($var).')</span> "'.$str.'"';
+			return $small('string') . $span(strlen($var)) . ' "'.$str.'"';
 		}
-		elseif (is_array($var))
-		{
+
+		if (is_array($var)) {
 			// Indentation for this variable
 			$output = array();
-			$space = str_repeat($s = '    ', $level);
+			$space  = str_repeat($s = '    ', $level);
 			static $marker;
 
-			if ($marker === NULL)
-			{
+			if ($marker === NULL) {
 				// Make a unique marker
 				$marker = uniqid("\x00");
 			}
 
-			if (empty($var))
-			{
+			if (empty($var)) {
 				// Do nothing
-			}
-			elseif (isset($var[$marker]))
-			{
+			} elseif (isset($var[$marker]) and ! empty($var)) {
 				$output[] = "(\n$space$s*RECURSION*\n$space)";
-			}
-			elseif ($level < 5)
-			{
+			} elseif ($level < 5) {
 				$output[] = "<span>(";
 				$var[$marker] = TRUE;
 
-				foreach ($var as $key => &$val)
-				{
-					if ($key === $marker) continue;
+				foreach ($var as $key => &$val) {
+					if ($key === $marker) {
+						continue;
+					}
 
-					if ( ! is_int($key))
-					{
+					if ( ! is_int($key)) {
 						$key = '"' . htmlspecialchars($key, ENT_NOQUOTES, 'utf-8') . '"';
 					}
 
@@ -327,113 +313,90 @@ class Juriya {
 				}
 
 				unset($var[$marker]);
-
 				$output[] = "$space)</span>";
-			}
-			else
-			{
+			} else {
 				// Depth too great
 				$output[] = "(\n$space$s...\n$space)";
 			}
 
-			return '<small>array</small><span>(' . count($var) . ')</span> ' . implode("\n", $output);
+			return $small('array') . $span(count($var)) . implode("\n", $output);
 		}
-		elseif (is_object($var))
-		{
+
+		if (is_object($var)) {
 			// Copy the object as an array
-			$array = (array) $var;
-			$output = array();
+			$array = (array) $var and $output = array();
 
 			// Indentation for this variable
 			$space = str_repeat($s = '    ', $level);
-			$hash = spl_object_hash($var);
+			$hash  = spl_object_hash($var);
 
 			// Objects that are being dumped
 			static $objects = array();
 
-			if (empty($var))
-			{
-				// Do nothing
-			}
-			elseif (isset($objects[$hash]))
-			{
+			if (isset($objects[$hash])) {
 				$output[] = "{\n$space$s*RECURSION*\n$space}";
-			}
-			elseif ($level < 10)
-			{
+			} elseif ($level < 10) {
 				$output[] = "<code>{";
 				$objects[$hash] = TRUE;
 
-				foreach ($array as $key => &$val)
-				{
-					if ($key[0] === "\x00")
-					{
+				foreach ($array as $key => &$val) {
+					if ($key[0] === "\x00") {
 						// Determine the access and remove the access level from the variable name
-						$access = '<small>'.($key[1] === '*' ? 'protected' : 'private').'</small>';
-						$key = substr($key, strrpos($key, "\x00") + 1);
-					}
-					else
-					{
-						$access = '<small>public</small>';
+						$visibility = $key[1] === '*' ? 'protected' : 'private';
+						$access     = $small($visibility);
+						$key        = substr($key, strrpos($key, "\x00") + 1);
+					} else {
+						$access = $small('public');
 					}
 
-					$output[] = "$space$s$access $key => " . self::dump($val, $length, $level + 1);
+					$output[] = "$space$s$access $key => " 
+								. self::dump($val, $length, $level + 1);
 				}
 
 				unset($objects[$hash]);
-
 				$output[] = "$space}</code>";
-			}
-			else
-			{
+			} else {
 				// Depth too great
 				$output[] = "{\n$space$s...\n$space}";
 			}
 
-			return '<small>object</small>'
-				. '<span>' . get_class($var) . '(' . count($array) . ')</span> ' 
-				. implode("\n", $output);
+			return $small('object')
+					. '<span>' . get_class($var) . '(' . count($array) . ')</span> ' 
+					. implode("\n", $output);
 		}
-		else
-		{
-			return '<small>' . gettype($var) . '</small> '
+		
+		return $small(gettype($var))
 				. htmlspecialchars(print_r($var, TRUE), ENT_NOQUOTES, 'utf-8');
-		}
 	}
 
 	/**
 	 * Register namespace and paths
 	 *
-	 * @access	protected
 	 * @return	array 
 	 */
 	protected static function _namespacePath()
 	{
 		// Register namespaces
-		if (self::initStatus() and self::$config->get('MODULES') and is_null(self::$ns))
-		{
+		if (self::initStatus() and self::$config->get('MODULES') 
+			and is_null(self::$ns)) {
 			$namespaces = array(NS_APP) and $paths = array(PATH_APP);
-			$modules = self::$config->get('MODULES');
+			$modules    = self::$config->get('MODULES');
 			
-			foreach ($modules as $module => $params)
-			{
+			foreach ($modules as $module => $params) {
 				$namespaces[] = '\\' . $params['namespace'] . '\\';
-				$paths[] = $params['path'];
+				$paths[]      = $params['path'];
 			}
 
 			$namespaces[] = NS_SYS and $paths[] = PATH_SYS;
-			self::$ns = new Data($namespaces) and self::$path = new Data($paths);
-		}
-		elseif (self::$ns instanceof Data and self::$path instanceof Data)
-		{
+			self::$ns     = new Data($namespaces) and self::$path = new Data($paths);
+		} elseif (self::$ns instanceof Data and self::$path instanceof Data) {
 			$namespaces = self::$ns->get() and $paths = self::$path->get();
-		}
-		else
-		{
+		} else {
 			$namespaces = array(NS_APP, NS_SYS);
-			$paths = array(PATH_APP, PATH_SYS);
+			$paths      = array(PATH_APP, PATH_SYS);
 		}
 
+		// Return the main 
 		return array($namespaces, $paths);
 	}
 }

@@ -68,8 +68,13 @@ class Request {
 		$path = is_array($this->routes->path) ? implode('\\', $this->routes->path) : '';
 		$controller = self::factory($path . $this->routes->controller);
 		$executor = $this->routes->executor;
-		$response = $controller->$executor();
 
+		try {
+    		$response = $controller->$executor();
+		} catch (Exception $e) {
+    		\Juriya\Exception::accept($e)->handle();
+		}
+		
 		return $response;
 	}
 }
