@@ -9,13 +9,17 @@
 define('ENVIRONMENT', $environment);
 
 // Define frameworks paths
-define('PATH_CLASS', 'classes' . DIRECTORY_SEPARATOR);
 define('PATH_APP',   realpath($application) . DIRECTORY_SEPARATOR);
 define('PATH_MOD',   realpath($modules) . DIRECTORY_SEPARATOR);
 define('PATH_SYS',   realpath($system) . DIRECTORY_SEPARATOR);
 
+// Common sub-paths
+define('PATH_CLASS', 'classes' . DIRECTORY_SEPARATOR);
+define('PATH_LIB',   'lib' . DIRECTORY_SEPARATOR);
+
 // Define frameworks namespaces
 define('NS_APP', '\\App\\');
+define('NS_MOD', '\\Mod\\');
 define('NS_SYS', '\\Juriya\\');
 
 // Define PHP extension
@@ -36,7 +40,7 @@ if (ENVIRONMENT == 'development') {
 	error_reporting(0);
 }
 
-// Turn off any internal errors.
+// Turn off any errors reports.
 ini_set('display_errors', 'Off');
 
 /**
@@ -48,7 +52,7 @@ ini_set('display_errors', 'Off');
 require_once PATH_SYS . PATH_CLASS . 'juriya' . EXT;
 require_once PATH_SYS . PATH_CLASS . 'exception' . EXT;
 require_once PATH_SYS . PATH_CLASS . 'logger' . EXT;
-require_once PATH_SYS . PATH_CLASS . 'lib' . DIRECTORY_SEPARATOR . 'socket' . EXT;
+require_once PATH_SYS . PATH_CLASS . PATH_LIB . 'socket' . EXT;
 
 // Import core class
 use \Juriya\Juriya;
@@ -66,16 +70,24 @@ spl_autoload_register('\\Juriya\\Juriya::autoload');
 
 // Register exception and error handler
 set_exception_handler(function($e) {
-	\Juriya\Exception::accept($e)->handleException();
+	\Juriya\Exception::make($e)->handleException();
 });
 
 set_error_handler(function($errno, $errstr, $errfile, $errline) {
 	$error = array($errno, $errstr, $errfile, $errline);
-	\Juriya\Exception::accept($error)->handleError();
+	\Juriya\Exception::make($error)->handleError();
 });
 
 // Register shutdown handler
 register_shutdown_function(function() {
+	// Find some premature script error
+	$lasterror = error_get_last();
+
+	if ( ! empty($lasterror)) {
+		\Juriya\Exception::make(array_values($lasterror))->handleError();
+	}
+
+	// Stop all log proccess and generate log reports
 	\Juriya\Logger::stop('Juriya\\Juriya');
 	\Juriya\Logger::report();
 });
@@ -117,6 +129,57 @@ foreach (array(PATH_APP, PATH_SYS) as $path) {
 // Configure Juriya 
 Juriya::configure($configs);
 
+// Reset 
+unset($configs);
+
+/**
+ *---------------------------------------------------------------
+ * Define framework low-level functions
+ *---------------------------------------------------------------
+ */
+ // Debugger method
+function debug() {
+	$vars   = func_get_args();
+	echo call_user_func_array(array('\Juriya\Juriya', 'debug'), $vars);
+}
+
+// Logger methods
+function log_start() {
+	if (func_num_args() === 1) {
+		$class = func_get_args();
+		return call_user_func_array(array('\Juriya\Logger', 'start'), $class);
+	} 
+	
+	throw new Exception('Cannot start log process for undefined class');
+}
+
+function log_stop() {
+	if (func_num_args() === 1) {
+		$class = func_get_args();
+		return call_user_func_array(array('\Juriya\Logger', 'stop'), $class);
+	} 
+	
+	throw new Exception('Cannot stop log process for undefined class');
+}
+
+function log_report() {
+	if (func_num_args() === 1) {
+		$class = func_get_args();
+		return call_user_func_array(array('\Juriya\Logger', 'report'), $class);
+	} 
+	
+	throw new Exception('Cannot report log process for undefined class');
+}
+
+function log_write() {
+	if (func_num_args() >= 2) {
+		$log = func_get_args();
+		return call_user_func_array(array('\Juriya\Logger', 'write'), $log);
+	} 
+	
+	throw new Exception('Cannot write log process for undefined class');
+}
+
 /**
  *---------------------------------------------------------------
  * Launch program.
@@ -127,5 +190,3 @@ $launcher = new Juriya();
 
 // Execute the application
 $launcher->execute();
-
-

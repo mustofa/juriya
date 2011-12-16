@@ -55,9 +55,10 @@ class Router {
 	 */
 	function __construct()
 	{
-		$this->server   = $_SERVER;
-		$this->tunnel   = Juriya::$method;
-		$this->executor = 'execute' . Juriya::$method;
+		$this->server    = $_SERVER;
+		$this->tunnel    = Juriya::$method;
+		$this->executor  = 'execute' . ucfirst(strtolower(Juriya::$method));
+		$this->arguments = array();
 	}
 
 	/**
@@ -135,7 +136,8 @@ class Router {
 								preg_match($pattern, $elem, $matches);
 
 								if ( ! empty($matches) 
-								    and FALSE !== ($argument = array_shift($matches))) {
+								    and FALSE !== array_shift($matches)
+								    and FALSE !== Juriya::$temp) {
 									Juriya::$temp = TRUE;
 								} else {
 									Juriya::$temp = FALSE;
@@ -147,7 +149,7 @@ class Router {
 						if (Juriya::$temp) {
 							// Set match controller and matched arguments
 							$this->controller  = $routes[$route_name]['controller'];
-							$this->arguments[] = $arguments;
+							$this->arguments = $arguments;
 						}
 					}
 				}
@@ -156,8 +158,19 @@ class Router {
 		
 		// If requested controller still not found, check class existance
 		if (is_null($this->controller)) {
-			// Looking whether the request is asking for module
+			// Looking whether the request is asking for sub-controller or modules
 			if (count($arguments) >= 2) {
+
+				// Looking whether sub-controller is exists
+				$sub_controller = NS_APP . 'Controllers' . '\\' . implode('\\', $arguments);
+				
+				if (class_exists($sub_controller)) {
+					$this->controller = implode('\\', $arguments);
+
+					return $this;
+				}
+
+				// Looking inside modules
 				$fragments = array();
 				$array     = new \ArrayObject($arguments);
 				$iterator  = $array->getIterator();
@@ -170,12 +183,13 @@ class Router {
 					$namespace  .= $iterator->current() . '\\';
 					$iterator->next();
 				}
-
+				
 				if (($class_name = substr($namespace, 0, -1))
 				    and class_exists($class_name)) {
-					$this->module     = $module_index;
+
+					$this->module     = array_shift($arguments);
+					$this->path       = $this->module . '.' . implode('\\', $arguments);
 					$this->controller = array_pop($fragments);
-					$this->path       = $fragments;
 				}
 			}
 

@@ -175,7 +175,26 @@ class Juriya {
 		}
 
 		// Check result and log appropriate warning if not exist
-		$loaded or Logger::write(__CLASS__, $class . ' not found.', 2);
+		if ( ! $loaded) {
+			$e       = new \Exception();
+			$valid_e = TRUE;
+
+			// Loop over tracer, to see whether the error is really valid
+			foreach($e->getTrace() as $trace) {
+				// We expect that this was just to check
+				if ($trace['function'] == 'class_exists') {
+					$valid_e = FALSE;
+					Logger::write(__CLASS__, $class . ' not found.', 2);
+
+					continue;
+				}
+			}
+
+			// Throw exception
+			if ($valid_e) {
+				throw new \Exception($class . ' not found.');
+			}
+		}
 	}
 
 	/**
@@ -226,7 +245,7 @@ class Juriya {
 		
 		// Itterate variables and dump into readable output
 		foreach ($vars as $var) {
-			$output[] = (self::$method == 'CLI') ? var_export($var, TRUE) : self::dump($var, 1024);
+			$output[] = (self::$method == 'CLI') ? var_export($var, TRUE) : self::dumpHtml($var, 1024);
 		}
 
 		// Prepare the output, then return appropriate result
@@ -236,14 +255,14 @@ class Juriya {
 	}
 
 	/**
-	 * Dump variable(s)
+	 * Dump variable(s) as HTML fragments
 	 *
 	 * @param   mixed   the variable to dump
 	 * @param   int     length
 	 * @param   int     depth level
 	 * @return	string  HTML chunk
 	 */
-	public static function dump(&$var, $length = 128, $level = 0)
+	public static function dumpHtml(&$var, $length = 128, $level = 0)
 	{
 		$small = function($var) {
 			return '<small>' . $var . '</small>';
@@ -310,7 +329,7 @@ class Juriya {
 						$key = '"' . htmlspecialchars($key, ENT_NOQUOTES, 'utf-8') . '"';
 					}
 
-					$output[] = "$space$s$key => " . self::dump($val, $length, $level + 1);
+					$output[] = "$space$s$key => " . self::dumpHtml($val, $length, $level + 1);
 				}
 
 				unset($var[$marker]);
@@ -351,7 +370,7 @@ class Juriya {
 					}
 
 					$output[] = "$space$s$access $key => " 
-					            . self::dump($val, $length, $level + 1);
+					            . self::dumpHtml($val, $length, $level + 1);
 				}
 
 				unset($objects[$hash]);

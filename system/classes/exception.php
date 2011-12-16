@@ -57,7 +57,7 @@ class Exception {
 	 * @param  object
 	 * @return object
 	 */
-	public static function accept($e)
+	public static function make($e)
 	{
 		return new static($e);
 	}
@@ -110,7 +110,7 @@ class Exception {
 		                           $this->exception->getFile(),
 		                           $this->exception->getLine());
 		Logger::write('Juriya\\Juriya', $message, 3);
-		echo Juriya::debug($severity, $message);
+		echo Juriya::debug($severity, $message, $this->exception->getTrace());
 	}
 
 	/**

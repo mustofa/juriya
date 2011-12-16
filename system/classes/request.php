@@ -26,19 +26,34 @@ class Request {
 	/**
 	 * Manufacturing Controller
 	 *
-	 * @param   string  controller name
+	 * Prototype :
+	 *		Request::factory('foo');            // Return \App\Controllers\Foo
+	 *		Request::factory('foo.bar');        // Return \Mod\Foo\Controllers\Bar
+	 *
+	 * @param   string  controller name or path
 	 * @throws  object  Juriya exception
 	 * @return  object  controller interface
 	 */
 	public static function factory($controller)
 	{
-		foreach (Juriya::$ns as $ns) {
-			if (($class_name = $ns . 'Controllers\\'.$controller)
-			    and class_exists($class_name)) {
-		    	return new $class_name;
-		    }
+		if (($fragments = explode('.', $controller))
+		    and count($fragments) == 2) {
+		    //$sub = array_shift($)
+		    $ns = NS_MOD . ucfirst($fragments[0]) . '\\';
+		    
+		    if (($class_name = $ns . 'Controllers\\' . $fragments[1])
+				    and class_exists($class_name)) {
+			    	return new $class_name;
+			}
+		} else {
+			foreach (Juriya::$ns as $ns) {
+				if (($class_name = $ns . 'Controllers\\' . $controller)
+				    and class_exists($class_name)) {
+			    	return new $class_name;
+			    }
+			}
 		}
-
+	
 		throw new \Exception('Controller not exists');
 	}
 
@@ -61,16 +76,11 @@ class Request {
 	 */
 	public function execute()
 	{
-		$path       = is_array($this->routes->path) ? implode('\\', $this->routes->path) : '';
-		$controller = self::factory($path . $this->routes->controller);
+		$path       = $this->routes->path;
+		$controller = self::factory((empty($path) ? $this->routes->controller : $path));
 		$executor   = $this->routes->executor;
-
-		try {
-    		$response = $controller->$executor();
-		} catch (Exception $e) {
-    		\Juriya\Exception::accept($e)->handle();
-		}
+		$arguments  = $this->routes->arguments;
 		
-		return $response;
+		return call_user_func_array(array($controller, $executor), $arguments);
 	}
 }

@@ -11,7 +11,11 @@
  * @author   Taufan Aditya
  */
 
-class Bar extends \Juriya\Controller {
+use \Juriya\Juriya;
+use \Juriya\Controller;
+use \Juriya\Request;
+
+class Bar extends Controller {
 	
 	/**
 	 * Serve HTTP execute method

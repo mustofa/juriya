@@ -49,7 +49,7 @@ class Logger {
 			self::$profiler[$identifier]->ksortDesc();
 			$profiler   = self::$profiler[$identifier];
 			$log        = self::$log[$identifier];
-			echo Juriya::debug($profile, $log);
+			echo Juriya::debug($profiler, $log);
 		}
 	}
 
@@ -110,7 +110,7 @@ class Logger {
 	 */
 	public static function check($identifier)
 	{
-		if (self::$_init == FALSE or is_null(self::$profiler[$identifier])) {
+		if (self::$_init == FALSE or ! isset(self::$profiler[$identifier])) {
 			self::$_init = TRUE;
 			self::$profiler[$identifier] = new Data()
 			and self::$log[$identifier]  = new Data();
