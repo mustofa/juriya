@@ -175,7 +175,6 @@ class Router {
 				$array     = new \ArrayObject($arguments);
 				$iterator  = $array->getIterator();
 				$namespace = '\\Mod\\' . ucfirst($iterator->current()) . '\\Controllers\\';
-				$module    = $iterator->current();
 				$iterator->next();
 				
 				while($iterator->valid()) {

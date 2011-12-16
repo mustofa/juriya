@@ -72,7 +72,7 @@ class Request {
 	/**
 	 * Execute the request
 	 *
-	 * @return  mixed   Response to output
+	 * @return  mixed   Response
 	 */
 	public function execute()
 	{

@@ -150,6 +150,7 @@ class Juriya {
 	 * Autoloader
 	 *
 	 * @param   string  class path
+	 * @throws  Juriya exception
 	 * @return  mixed
 	 */
 	public static function autoload($class)
@@ -220,7 +221,7 @@ class Juriya {
 
 		// Return the class or throw exception
 		if (class_exists($class)) {
-			return new $class;
+			return (is_null($params)) ? new $class : new $class($params);
 		}
 
 		// throw Juriya expention
