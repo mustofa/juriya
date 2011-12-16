@@ -52,6 +52,7 @@ require_once PATH_SYS . PATH_CLASS . 'lib' . DIRECTORY_SEPARATOR . 'socket' . EX
 
 // Import core class
 use \Juriya\Juriya;
+
 /**
  *---------------------------------------------------------------
  * Set framework environment and appropriate handler.
