@@ -107,8 +107,8 @@ class Exception {
 	{
 		$severity = $this->severity($this->exception->getCode());
 		$message  = $this->message($this->exception->getMessage(),
-		                          $this->exception->getFile(),
-		                          $this->exception->getLine());
+		                           $this->exception->getFile(),
+		                           $this->exception->getLine());
 		Logger::write('Juriya\\Juriya', $message, 3);
 		echo Juriya::debug($severity, $message);
 	}
@@ -152,6 +152,6 @@ class Exception {
 		}
 
 		return rtrim($message, '.')
-				. ' in ' . $file . ' on line ' . $line . '.';
+		       . ' in ' . $file . ' on line ' . $line . '.';
 	}
 }
