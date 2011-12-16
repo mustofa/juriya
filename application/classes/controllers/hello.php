@@ -16,10 +16,9 @@ class Hello extends \Juriya\Controller{
 	/**
 	 * Serve HTTP execute method
 	 * 
-	 * @access public
 	 * @return string
 	 */
-	public function executeHTTP()
+	public function executeHttp()
 	{
 		/* Mock up clashes class name */
 
@@ -52,10 +51,9 @@ class Hello extends \Juriya\Controller{
 	/**
 	 * Serve CLI execute method
 	 * 
-	 * @access public
 	 * @return string
 	 */
-	public function executeCLI()
+	public function executeCli()
 	{
 		echo 'Hello World';
 	}

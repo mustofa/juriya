@@ -26,17 +26,15 @@ class Request {
 	/**
 	 * Manufacturing Controller
 	 *
-	 * @access  public
 	 * @param   string  controller name
+	 * @throws  object  Juriya exception
 	 * @return  object  controller interface
 	 */
 	public static function factory($controller)
 	{
-		foreach (Juriya::$ns as $ns)
-		{
+		foreach (Juriya::$ns as $ns) {
 			if (($class_name = $ns . 'Controllers\\'.$controller)
-			     and class_exists($class_name))
-		    {
+			    and class_exists($class_name)) {
 		    	return new $class_name;
 		    }
 		}
@@ -47,7 +45,6 @@ class Request {
 	/**
 	 * Get request routes information
 	 *
-	 * @access  public
 	 * @return  void
 	 */
 	public function route()
@@ -60,14 +57,13 @@ class Request {
 	/**
 	 * Execute the request
 	 *
-	 * @access  public
 	 * @return  mixed   Response to output
 	 */
 	public function execute()
 	{
-		$path = is_array($this->routes->path) ? implode('\\', $this->routes->path) : '';
+		$path       = is_array($this->routes->path) ? implode('\\', $this->routes->path) : '';
 		$controller = self::factory($path . $this->routes->controller);
-		$executor = $this->routes->executor;
+		$executor   = $this->routes->executor;
 
 		try {
     		$response = $controller->$executor();

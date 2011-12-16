@@ -19,7 +19,7 @@ class Controller implements Socket{
 	 * @access public
 	 * @return string
 	 */
-	public function executeHTTP()
+	public function executeHttp()
 	{
 		echo 'Empty Response';
 	}
@@ -30,7 +30,7 @@ class Controller implements Socket{
 	 * @access public
 	 * @return string
 	 */
-	public function executeCLI()
+	public function executeCli()
 	{
 		echo 'Empty Response';
 	}

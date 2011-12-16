@@ -84,11 +84,13 @@ class Exception {
 		        Logger::write('Juriya\\Juriya', $message, 3);
 				echo Juriya::debug($header, $message);
 		        exit(1);
+
 		        break;
 
 		    default:
 				Logger::write('Juriya\\Juriya', $message, 2);
 				echo Juriya::debug($header, $message);
+
 		        break;
 	    }
 
@@ -139,8 +141,8 @@ class Exception {
 		// Show fake path and corresponding error line
 		$realpath = array(PATH_APP, PATH_MOD, PATH_SYS);
 		$fakepath = array('PATH_APP' . DIRECTORY_SEPARATOR, 
-                          'PATH_MOD' . DIRECTORY_SEPARATOR, 
-                          'PATH_SYS' . DIRECTORY_SEPARATOR);
+		                  'PATH_MOD' . DIRECTORY_SEPARATOR, 
+		                  'PATH_SYS' . DIRECTORY_SEPARATOR);
 		$file     = str_replace($realpath, $fakepath, $file);
 
 		// Filtering non-useful fraction and send the message

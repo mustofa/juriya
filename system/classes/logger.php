@@ -97,8 +97,8 @@ class Logger {
 		array_map(function($pointer, $value) {
 			$start   = Logger::$profiler[Juriya::$temp][$pointer . '_start'];
 			$elapsed = $value - $start;
-			Logger::$profiler[Juriya::$temp]->add($pointer . '_end', $value);
-			Logger::$profiler[Juriya::$temp]->add($pointer . '_elapsed', $elapsed);
+			Logger::$profiler[Juriya::$temp]->set($pointer . '_end', $value);
+			Logger::$profiler[Juriya::$temp]->set($pointer . '_elapsed', $elapsed);
 		}, $pointers, $values);
 	}
 
@@ -111,8 +111,10 @@ class Logger {
 	public static function check($identifier)
 	{
 		if (self::$_init == FALSE or is_null(self::$profiler[$identifier])) {
-			self::$_init = TRUE and self::$profiler[$identifier] = new Data()
-			and self::$log[$identifier] = new Data();
+			self::$_init = TRUE;
+			self::$profiler[$identifier] = new Data()
+			and self::$log[$identifier]  = new Data();
+
 			return;
 		}
 	}

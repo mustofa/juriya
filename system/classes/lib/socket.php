@@ -19,7 +19,7 @@ interface Socket {
 	 * @access public
 	 * @return string
 	 */
-	public function executeHTTP();
+	public function executeHttp();
 
 	/**
 	 * All socket classes must have CLI execute method
@@ -27,6 +27,6 @@ interface Socket {
 	 * @access public
 	 * @return string
 	 */
-	public function executeCLI();
+	public function executeCli();
 	
 }

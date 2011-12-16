@@ -26,7 +26,6 @@ class Data implements \ArrayAccess, \Iterator, \Countable {
     /**
      * Handle array isset
      *
-     * @access  public
      * @return  bool
      */
     public function offsetExists($offset) 
@@ -37,7 +36,6 @@ class Data implements \ArrayAccess, \Iterator, \Countable {
     /**
      * Handle array getter
      *
-     * @access  public
      * @return  mixed
      */
     public function offsetGet($offset) 
@@ -48,17 +46,13 @@ class Data implements \ArrayAccess, \Iterator, \Countable {
     /**
      * Handle array setter
      *
-     * @access  public
      * @return  void
      */
     public function offsetSet($offset, $value) 
     {
-        if (is_null($offset)) 
-        {
+        if (is_null($offset)) {
             $this->_collections[] = $value;
-        } 
-        else
-        {
+        } else {
             $this->_collections[$offset] = $value;
         }
     }
@@ -66,7 +60,6 @@ class Data implements \ArrayAccess, \Iterator, \Countable {
     /**
      * Handle array unsetter
      *
-     * @access  public
      * @return  void
      */
     public function offsetUnset($offset) 
@@ -77,7 +70,6 @@ class Data implements \ArrayAccess, \Iterator, \Countable {
      /**
      * Handle rewind
      *
-     * @access  public
      * @return  void
      */
     public function rewind() 
@@ -88,7 +80,6 @@ class Data implements \ArrayAccess, \Iterator, \Countable {
     /**
      * Handle current
      *
-     * @access  public
      * @return  void
      */
     public function current() 
@@ -99,7 +90,6 @@ class Data implements \ArrayAccess, \Iterator, \Countable {
     /**
      * Handle key
      *
-     * @access  public
      * @return  mixed
      */
     public function key() 
@@ -110,7 +100,6 @@ class Data implements \ArrayAccess, \Iterator, \Countable {
     /**
      * Handle next
      *
-     * @access  public
      * @return  mixed
      */
     public function next() 
@@ -121,15 +110,12 @@ class Data implements \ArrayAccess, \Iterator, \Countable {
     /**
      * Handle last
      *
-     * @access  public
      * @return  mixed
      */
     public function last() 
     {
         end($this->_collections) and $last_index = key($this->_collections);
-
         $collections = $this->_collections[$last_index];
-
         reset($this->_collections);
 
         return $collections;
@@ -138,7 +124,6 @@ class Data implements \ArrayAccess, \Iterator, \Countable {
     /**
      * Handle valid
      *
-     * @access  public
      * @return  bool
      */
     public function valid() 
@@ -149,7 +134,6 @@ class Data implements \ArrayAccess, \Iterator, \Countable {
     /**
      * Handle counter
      *
-     * @access  public
      * @return  int
      */
     public function count() 
@@ -158,114 +142,109 @@ class Data implements \ArrayAccess, \Iterator, \Countable {
     }
 
     /**
+     * Sorting collection Ascending
+     *
+     * @return  void
+     */
+    public function ksortAsc() 
+    {
+        ksort($this->_collections);
+    }
+
+    /**
+     * Sorting collection Descending
+     *
+     * @return  void
+     */
+    public function ksortDesc() 
+    {
+        krsort($this->_collections);
+    }
+
+    /**
      * Collection getter
      *
-     * @access  public
      * @param   string
      * @param   mixed
      * @return  int
      */
     public function get($path = null, $default = FALSE) 
     {
+        // Create new array for processing
         $array = $this->_collections;
 
-        if (is_null($path)) return $array;
+        if (is_null($path)) {
+            return $array;
+        }
 
-        // Remove outer dots, wildcards, or spaces
-        $path = trim($path, '.* ');     
-
-        // Split the keys by slashes
+        // Remove outer dots, wildcards, or spaces and split the keys
+        $path = trim($path, '.* ');
         $keys = explode('.', $path);
 
-        do
-        {
+        do {
             $key = array_shift($keys);
 
-            if (ctype_digit($key))
-            {
+            if (ctype_digit($key)) {
                 // Make the key an integer
                 $key = (int) $key;
             }
 
-            if (isset($array[$key]))
-            {
-                if ($keys)
-                {
-                    if (is_array($array[$key]))
-                    {
+            if (isset($array[$key])) {
+                if ($keys) {
+                    if (is_array($array[$key])) {
                         // Dig down into the next part of the path
                         $array = $array[$key];
-                    }
-                    else
-                    {
+                    } else {
                         // Unable to dig deeper
                         break;
                     }
-                }
-                else
-                {
+                } else {
                     // Found the path requested
                     return $array[$key];
                 }
-            }
-            elseif ($key === '*')
-            {
+            } elseif ($key === '*') {
                 // Handle wildcards
-
-                if (empty($keys))
-                {
+                if (empty($keys)) {
                     return $array;
                 }
 
                 $values = array();
 
-                foreach ($array as $arr)
-                {
-                    if ($value = self::get($arr, implode('.', $keys)))
-                    {
+                foreach ($array as $arr) {
+                    if ($value = self::get($arr, implode('.', $keys))) {
                         $values[] = $value;
                     }
                 }
 
-                if ($values)
-                {
+                if ($values) {
                     // Found the values requested
                     return $values;
-                }
-                else
-                {
+                } else {
                     // Unable to dig deeper
                     break;
                 }
-            }
-            else
-            {
+            } else {
                 // Unable to dig deeper
                 break;
             }
-        }
-        
-        while ($keys);
+        } while ($keys);
 
         // Unable to find the value requested
         return $default;
     }
 
     /**
-     * Assign a collection data
+     * Set/assign a collection data
      *
-     * @access  public
      * @param   mixed   Collection key
      * @param   mixed   Collection values
      * @return  void
      */
-    public function add($key, $value) 
+    public function set($key, $value) 
     {
         // If the key are arrays build associative array, otherwise build one level array
-        if (is_array($key))
-        {
-            switch(count($key))
-            {
+        if (is_array($key)) {
+            switch(count($key)) {
                 case 1:
                     $this->_collections[$key[0]] = $value;
 
@@ -286,22 +265,8 @@ class Data implements \ArrayAccess, \Iterator, \Countable {
 
                     break;
             }
-            
-        }
-        else
-        {
+        } else {
             $this->_collections[$key] = $value;
         }
-    }
-
-    /**
-     * Sorting collection Descending
-     *
-     * @access  public
-     * @return  int
-     */
-    public function ksortDesc() 
-    {
-        krsort($this->_collections);
     }
 }

@@ -55,15 +55,14 @@ class Router {
 	 */
 	function __construct()
 	{
-		$this->server = $_SERVER;
-		$this->tunnel = Juriya::$method;
+		$this->server   = $_SERVER;
+		$this->tunnel   = Juriya::$method;
 		$this->executor = 'execute' . Juriya::$method;
 	}
 
 	/**
 	 * Detect program routes
 	 *
-	 * @access  public
 	 * @return  object  Routes information
 	 */
 	public function detect()
@@ -77,14 +76,12 @@ class Router {
 	/**
 	 * Detect requested controller
 	 *
-	 * @access  protected
 	 * @return  void
 	 */
 	protected function _detectController()
 	{
 		// Determine passed arguments
-		switch($this->tunnel)
-		{
+		switch($this->tunnel) {
 			case 'HTTP':
 				$arguments = explode('/', $this->server['REQUEST_URI']);
 				array_shift($arguments);
@@ -98,74 +95,58 @@ class Router {
 		}
 
 		// Remove front socket
-		$arguments = array_filter($arguments, function ($item) use (&$arguments) 
-		{
+		$arguments = array_filter($arguments, function ($item) use (&$arguments) {
 		    next($arguments);
 
 		    return ($item == 'index.php') ? FALSE : $item;
 		});
 
 		// Remove query string url
-		$arguments = array_map(function ($item) use (&$arguments) 
-		{
+		$arguments = array_map(function ($item) use (&$arguments) {
 		    next($arguments);
-
 		    $sanitized_item = parse_url($item);
 
 		    return $sanitized_item['path'];
 		}, $arguments);
 
 		// Check the routes configuration against the arguments
-		if (FALSE !== ($routes = Juriya::$config['ROUTES']))
-		{
-			if (empty($arguments))
-			{
+		if (FALSE !== ($routes = Juriya::$config['ROUTES'])) {
+			if (empty($arguments)) {
 				// If no arguments being passed, get default route
 				$this->controller =  $routes['default']['controller'];
 			}
 
 			// Iterate each routes and find matching pattern
-			foreach ($routes as $route_name => $route)
-			{
+			foreach ($routes as $route_name => $route) {
 				// Only start checking if argument count matched
-				if (count($arguments) == count($route['arguments']))
-				{
+				if (count($arguments)  == count($route['arguments'])) {
 					if (($intersection = array_intersect($arguments, $route['arguments'])) 
-						and $arguments == $intersection )
-					{
+					    and $arguments == $intersection ) {
 						// Routes and arguments are literary identical
 						$this->controller = $routes[$route_name]['controller'];
-					}
-					else
-					{
+					} else {
 						// Perform regular expression to catch matched route
 						Juriya::$temp = TRUE;
 
-						array_map(function($pattern, $elem) 
-						{
-							if ( ! empty($pattern) and ! empty($elem))
-							{
-								substr($pattern, 0, 1) == '/' or $pattern = '/' . $pattern;
+						array_map(function($pattern, $elem) {
+							if ( ! empty($pattern) and ! empty($elem)) {
+								substr($pattern, 0, 1)  == '/' or $pattern  = '/' . $pattern;
 								substr($pattern, -1, 1) == '/' or $pattern .= '/';
 								preg_match($pattern, $elem, $matches);
 
 								if ( ! empty($matches) 
-									and FALSE !== ($argument = array_shift($matches)))
-								{
+								    and FALSE !== ($argument = array_shift($matches))) {
 									Juriya::$temp = TRUE;
-								}
-								else
-								{
+								} else {
 									Juriya::$temp = FALSE;
 								}
 							}
 
 						}, $route['arguments'], $arguments);
 
-						if (Juriya::$temp)
-						{
+						if (Juriya::$temp) {
 							// Set match controller and matched arguments
-							$this->controller = $routes[$route_name]['controller'];
+							$this->controller  = $routes[$route_name]['controller'];
 							$this->arguments[] = $arguments;
 						}
 					}
@@ -174,50 +155,45 @@ class Router {
 		}
 		
 		// If requested controller still not found, check class existance
-		if (is_null($this->controller))
-		{
+		if (is_null($this->controller)) {
 			// Looking whether the request is asking for module
-			if (count($arguments) >= 2)
-			{
-				$array = new \ArrayObject($arguments);
-
-				$iterator = $array->getIterator();
+			if (count($arguments) >= 2) {
+				$fragments = array();
+				$array     = new \ArrayObject($arguments);
+				$iterator  = $array->getIterator();
 				$namespace = '\\Mod\\' . ucfirst($iterator->current()) . '\\Controllers\\';
-				$module = $iterator->current();
+				$module    = $iterator->current();
 				$iterator->next();
-				$controller_fragments = array();
-
-				while($iterator->valid())
-				{
-					$controller_fragments[] = $iterator->current();
-					$namespace .= $iterator->current() . '\\';
+				
+				while($iterator->valid()) {
+					$fragments[] = $iterator->current();
+					$namespace  .= $iterator->current() . '\\';
 					$iterator->next();
 				}
 
 				if (($class_name = substr($namespace, 0, -1))
-					and class_exists($class_name))
-				{
-					$this->module = $module_index;
-					$this->controller = array_pop($controller_fragments);
-					$this->path = $controller_fragments;
+				    and class_exists($class_name)) {
+					$this->module     = $module_index;
+					$this->controller = array_pop($fragments);
+					$this->path       = $fragments;
 				}
 			}
 
 			// Look-up all available namespace for matching controller
-			foreach (Juriya::$ns as $ns)
-			{
+			foreach (Juriya::$ns as $ns) {
 				if (($class_name = $ns . 'Controllers\\' . implode('\\', $arguments))
-				     and class_exists($class_name))
-			    {
+				    and class_exists($class_name)) {
 			    	// The request arguments already contain valid controller
-			    	$fragments = new Data(explode('\\', $class_name));
+			    	$fragments        = new Data(explode('\\', $class_name));
 			    	$this->controller = ucfirst($fragments->last());
 
 			    	continue;
 			    }
 			}
 			
-			if (is_null($this->controller)) throw new \Exception('Request not found');
+			if (is_null($this->controller)) {
+				throw new \Exception('Request not found');
+			}
 		}
 		
 		return $this;
@@ -226,19 +202,16 @@ class Router {
 	/**
 	 * Detect request parameters
 	 *
-	 * @access  protected
 	 * @return  void
 	 */
 	protected function _detectParameter()
 	{
-		if ($this->tunnel == 'HTTP')
-		{
+		if ($this->tunnel == 'HTTP') {
 			// Determine the HTTP request method
 			$http_method = $this->server['REQUEST_METHOD'];
 
 			// Save any http request into Juriya input properties
-			switch ($http_method)
-			{
+			switch ($http_method) {
 				case 'GET':
 					Juriya::$input = $_GET;
 

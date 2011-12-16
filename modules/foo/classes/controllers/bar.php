@@ -16,10 +16,9 @@ class Bar extends \Juriya\Controller {
 	/**
 	 * Serve HTTP execute method
 	 * 
-	 * @access public
 	 * @return string
 	 */
-	public function executeHTTP()
+	public function executeHttp()
 	{
 		echo 'Foo Bar';
 	}
@@ -27,10 +26,9 @@ class Bar extends \Juriya\Controller {
 	/**
 	 * Serve CLI execute method
 	 * 
-	 * @access public
 	 * @return string
 	 */
-	public function executeCLI()
+	public function executeCli()
 	{
 		echo 'Foo Bar';
 	}

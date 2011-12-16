@@ -104,7 +104,7 @@ class Juriya {
 		    	foreach ($sub_items as $sub_index => $sub_item) {
 		    		$index = (array) Juriya::$temp;
 		    		$keys  = explode('.', $sub_index);
-		    		Juriya::$config->add(array_merge($index, $keys), $sub_item);
+		    		Juriya::$config->set(array_merge($index, $keys), $sub_item);
 		    	}
 		    }, $values);
 
@@ -231,6 +231,7 @@ class Juriya {
 
 		// Prepare the output, then return appropriate result
 		$output = implode("\n", $output);
+
 		return (self::$method == 'CLI') ? $output : '<pre class="debug">' . $output . '</pre>';
 	}
 
@@ -257,28 +258,28 @@ class Juriya {
 		}
 
 		if (is_bool($var)) {
-			return $small('bool') . ($var ? 'TRUE' : 'FALSE');
+			return $small('bool ') . ($var ? 'TRUE' : 'FALSE');
 		}
 		
 		if (is_float($var)) {
-			return $small('float') . $var;
+			return $small('float ') . $var;
 		}
 
 		if (is_resource($var)) {
-			return $small('resource') . $span($var);
+			return $small('resource ') . $span($var);
 		}
 
 		if (is_string($var)) {
 			if (strlen($var) > $length) {
 				// Encode the truncated string
 				$str = htmlspecialchars(substr($var, 0, $length), ENT_NOQUOTES, 'utf-8') 
-					. '&nbsp;&hellip;';
+				       . '&nbsp;&hellip;';
 			} else {
 				// Encode the string
 				$str = htmlspecialchars($var, ENT_NOQUOTES, 'utf-8');
 			}
 
-			return $small('string') . $span(strlen($var)) . ' "'.$str.'"';
+			return $small('string ') . $span(strlen($var)) . ' "'.$str.'"';
 		}
 
 		if (is_array($var)) {
@@ -350,7 +351,7 @@ class Juriya {
 					}
 
 					$output[] = "$space$s$access $key => " 
-								. self::dump($val, $length, $level + 1);
+					            . self::dump($val, $length, $level + 1);
 				}
 
 				unset($objects[$hash]);
@@ -361,12 +362,12 @@ class Juriya {
 			}
 
 			return $small('object')
-					. '<span>' . get_class($var) . '(' . count($array) . ')</span> ' 
-					. implode("\n", $output);
+			       . ' <span>' . get_class($var) . '(' . count($array) . ')</span> ' 
+			       . implode("\n", $output);
 		}
 		
-		return $small(gettype($var))
-				. htmlspecialchars(print_r($var, TRUE), ENT_NOQUOTES, 'utf-8');
+		return $small(gettype($var) . ' ')
+		       . htmlspecialchars(print_r($var, TRUE), ENT_NOQUOTES, 'utf-8');
 	}
 
 	/**
@@ -378,7 +379,7 @@ class Juriya {
 	{
 		// Register namespaces
 		if (self::initStatus() and self::$config->get('MODULES') 
-			and is_null(self::$ns)) {
+		    and is_null(self::$ns)) {
 			$namespaces = array(NS_APP) and $paths = array(PATH_APP);
 			$modules    = self::$config->get('MODULES');
 			
@@ -387,8 +388,9 @@ class Juriya {
 				$paths[]      = $params['path'];
 			}
 
-			$namespaces[] = NS_SYS and $paths[] = PATH_SYS;
-			self::$ns     = new Data($namespaces) and self::$path = new Data($paths);
+			$namespaces[]   = NS_SYS and $paths[] = PATH_SYS;
+			self::$ns       = new Data($namespaces) 
+			and self::$path = new Data($paths);
 		} elseif (self::$ns instanceof Data and self::$path instanceof Data) {
 			$namespaces = self::$ns->get() and $paths = self::$path->get();
 		} else {
