@@ -1,7 +1,0 @@
-.DS_Store
-.buildpath
-.project
-.settings/*
-application/classes/controllers/hello/*
-modules/foo/classes/controllers/bar/*
-

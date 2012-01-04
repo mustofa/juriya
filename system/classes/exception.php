@@ -19,6 +19,11 @@ class Exception {
 	protected $exception;
 
 	/**
+	 * @var array  Error parameters
+	 */
+	protected $error;
+
+	/**
 	 * @var array Human-readable error levels and descriptions.
 	 */
 	private $levels = array(0                  => 'Error',
@@ -38,7 +43,7 @@ class Exception {
 	/**
 	 * Constructor
 	 *
-	 * @param  object
+	 * @param  mixed
 	 * @return void
 	 */
 	function __construct($e)
@@ -46,8 +51,10 @@ class Exception {
 		// Set appropriate properties
 		if (is_array($e)) {
 			$this->error     = $e;
-		} else {
+		} elseif(is_object($e)) {
 			$this->exception = $e;
+		} else {
+			throw new \Exception('Cannot handle exception/error');
 		}
 	}
 

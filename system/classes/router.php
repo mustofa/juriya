@@ -58,12 +58,16 @@ class Router {
 	 *
 	 * @return void
 	 */
-	function __construct()
+	function __construct(Collection $config)
 	{
-		$this->server    = $_SERVER;
-		$this->tunnel    = Juriya::$method;
-		$this->executor  = 'execute' . ucfirst(strtolower(Juriya::$method));
-		$this->arguments = array();
+		if ($config->valid()) {
+			$this->server    = $config->get('server');
+			$this->tunnel    = $config->get('tunnel');
+			$this->executor  = $config->get('executor');
+			$this->arguments = array();
+		} else {
+			throw new \Exception('Cannot start Router process without proper configuration');
+		}
 	}
 
 	/**
@@ -159,8 +163,7 @@ class Router {
 					$iterator->next();
 				}
 				
-				if (($class_name = substr($namespace, 0, -1))
-				    and class_exists($class_name)) {
+				if (($class_name = substr($namespace, 0, -1)) && class_exists($class_name)) {
 
 					$this->module     = array_shift($arguments);
 					$this->path       = $this->module . '.' . implode('\\', $arguments);
@@ -171,9 +174,9 @@ class Router {
 			// Look-up all available namespace for matching controller
 			foreach (Juriya::$ns as $ns) {
 				if (($class_name = $ns . 'Controllers\\' . implode('\\', $arguments))
-				    and class_exists($class_name)) {
+				    && class_exists($class_name)) {
 			    	// The request arguments already contain valid controller
-			    	$fragments        = new Data(explode('\\', $class_name));
+			    	$fragments        = new Collection(explode('\\', $class_name));
 			    	$this->controller = ucfirst($fragments->last());
 
 			    	continue;
@@ -225,14 +228,14 @@ class Router {
 		// Only start checking if argument count matched
 		if (count($arguments)  == count($route['arguments'])) {
 			if (($intersection = array_intersect($arguments, $route['arguments'])) 
-			    and $arguments == $intersection ) {
+			   && $arguments == $intersection ) {
 				// Routes and arguments are literary identical
 				self::$route['controller'] = $route['controller'];
 				self::$route['arguments']  = $arguments;
 			} else {
 				// Perform regular expression to catch matched route
 				$results =  array_map(function($pattern, $elem) {
-					if ( ! empty($pattern) and ! empty($elem)) {
+					if ( ! empty($pattern) && ! empty($elem)) {
 						substr($pattern, 0, 1)  == '/' or $pattern  = '/' . $pattern;
 						substr($pattern, -1, 1) == '/' or $pattern .= '/';
 						preg_match($pattern, $elem, $matches);

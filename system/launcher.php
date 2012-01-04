@@ -45,7 +45,7 @@ ini_set('display_errors', 'Off');
 
 /**
  *---------------------------------------------------------------
- * Load main handler.
+ * Load main framework handler.
  *---------------------------------------------------------------
  */
 // Load main core handler classes
@@ -53,9 +53,17 @@ require_once PATH_SYS . PATH_CLASS . 'juriya' . EXT;
 require_once PATH_SYS . PATH_CLASS . 'exception' . EXT;
 require_once PATH_SYS . PATH_CLASS . 'logger' . EXT;
 require_once PATH_SYS . PATH_CLASS . PATH_LIB . 'socket' . EXT;
+require_once PATH_SYS . PATH_CLASS . PATH_LIB . 'data' . EXT;
 
-// Import core class
+/**
+ *---------------------------------------------------------------
+ * Import core framework classes.
+ *---------------------------------------------------------------
+ */
 use Juriya\Juriya;
+use Juriya\Exception;
+use Juriya\Logger;
+use Juriya\Collection;
 
 /**
  *---------------------------------------------------------------
@@ -70,12 +78,12 @@ spl_autoload_register('\\Juriya\\Juriya::autoload');
 
 // Register exception and error handler
 set_exception_handler(function($e) {
-	\Juriya\Exception::make($e)->handleException();
+	Exception::make($e)->handleException();
 });
 
 set_error_handler(function($errno, $errstr, $errfile, $errline) {
 	$e = array($errno, $errstr, $errfile, $errline);
-	\Juriya\Exception::make($e)->handleError();
+	Exception::make($e)->handleError();
 });
 
 // Register shutdown handler
@@ -84,17 +92,17 @@ register_shutdown_function(function() {
 	$lasterror = error_get_last();
 
 	if ( ! empty($lasterror)) {
-		\Juriya\Exception::make(array_values($lasterror))->handleError();
+		Exception::make(array_values($lasterror))->handleError();
 	}
 
 	// Stop all log proccess and generate log reports
-	\Juriya\Logger::stop('Juriya\\Juriya');
-	\Juriya\Logger::report();
+	Logger::stop('Juriya\\Juriya');
+	Logger::report();
 });
 
 /**
  *---------------------------------------------------------------
- * Define framework low-level functions
+ * Define framework low-level functions.
  *---------------------------------------------------------------
  */
  // Debugger method
@@ -146,7 +154,7 @@ function log_write() {
 
 /**
  *---------------------------------------------------------------
- * Load configuration and instantiate new launcher
+ * Load configuration and instantiate new launcher.
  *---------------------------------------------------------------
  */
 // config pool
@@ -177,11 +185,15 @@ if (isset($files) && ! is_null($files)) {
 // Reset all vars
 unset($path, $config, $files);
 
+// Prepare Juriya Configuration
+$config  = new Collection();
+$config->set('configuration', $configs);
+
 // Instantiate new launcher
-$launcher = new Juriya($configs);
+$launcher = new Juriya($config);
 
 // Reset configs value
-unset($configs);
+unset($config, $configs);
 
 /**
  *---------------------------------------------------------------

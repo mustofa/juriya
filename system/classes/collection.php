@@ -3,7 +3,7 @@
 /**
  * Juriya - RAD PHP 5 Micro Framework
  *
- * Data interface
+ * Collection class
  *
  * @package  Juriya
  * @category Core Class
@@ -11,16 +11,16 @@
  * @author   Taufan Aditya
  */
 
-class Data implements \ArrayAccess, \Iterator, \Countable {
+class Collection implements \ArrayAccess, \Iterator, \Countable, Data {
 
     /**
      * @var array Data collection
      */
-	private $_collections = array();
+	private $collections = array();
 
     function __construct($collections = array())
     {
-        $this->_collections = $collections;
+        $this->collections = $collections;
     }
 
     /**
@@ -30,7 +30,7 @@ class Data implements \ArrayAccess, \Iterator, \Countable {
      */
     public function offsetExists($offset) 
     {
-        return isset($this->_collections[$offset]);
+        return isset($this->collections[$offset]);
     }
 
     /**
@@ -40,7 +40,7 @@ class Data implements \ArrayAccess, \Iterator, \Countable {
      */
     public function offsetGet($offset) 
     {
-        return isset($this->_collections[$offset]) ? $this->_collections[$offset] : FALSE;
+        return isset($this->collections[$offset]) ? $this->collections[$offset] : FALSE;
     }
 
     /**
@@ -51,9 +51,9 @@ class Data implements \ArrayAccess, \Iterator, \Countable {
     public function offsetSet($offset, $value) 
     {
         if (is_null($offset)) {
-            $this->_collections[] = $value;
+            $this->collections[] = $value;
         } else {
-            $this->_collections[$offset] = $value;
+            $this->collections[$offset] = $value;
         }
     }
     
@@ -64,7 +64,7 @@ class Data implements \ArrayAccess, \Iterator, \Countable {
      */
     public function offsetUnset($offset) 
     {
-        unset($this->_collections[$offset]);
+        unset($this->collections[$offset]);
     }
 
      /**
@@ -74,7 +74,7 @@ class Data implements \ArrayAccess, \Iterator, \Countable {
      */
     public function rewind() 
     {
-        reset($this->_collections);
+        reset($this->collections);
     }
 
     /**
@@ -84,7 +84,7 @@ class Data implements \ArrayAccess, \Iterator, \Countable {
      */
     public function current() 
     {
-        return current($this->_collections);
+        return current($this->collections);
     }
 
     /**
@@ -94,7 +94,7 @@ class Data implements \ArrayAccess, \Iterator, \Countable {
      */
     public function key() 
     {
-        return key($this->_collections);
+        return key($this->collections);
     }
 
     /**
@@ -104,7 +104,7 @@ class Data implements \ArrayAccess, \Iterator, \Countable {
      */
     public function next() 
     {
-        return next($this->_collections);
+        return next($this->collections);
     }
 
     /**
@@ -114,9 +114,9 @@ class Data implements \ArrayAccess, \Iterator, \Countable {
      */
     public function last() 
     {
-        end($this->_collections) and $last_index = key($this->_collections);
-        $collections = $this->_collections[$last_index];
-        reset($this->_collections);
+        end($this->collections) and $last_index = key($this->collections);
+        $collections = $this->collections[$last_index];
+        reset($this->collections);
 
         return $collections;
     }
@@ -138,7 +138,7 @@ class Data implements \ArrayAccess, \Iterator, \Countable {
      */
     public function count() 
     {
-        return count($this->_collections);
+        return count($this->collections);
     }
 
     /**
@@ -148,7 +148,7 @@ class Data implements \ArrayAccess, \Iterator, \Countable {
      */
     public function ksortAsc() 
     {
-        ksort($this->_collections);
+        ksort($this->collections);
     }
 
     /**
@@ -158,7 +158,7 @@ class Data implements \ArrayAccess, \Iterator, \Countable {
      */
     public function ksortDesc() 
     {
-        krsort($this->_collections);
+        krsort($this->collections);
     }
 
     /**
@@ -171,7 +171,7 @@ class Data implements \ArrayAccess, \Iterator, \Countable {
     public function get($path = null, $default = FALSE) 
     {
         // Create new array for processing
-        $array = $this->_collections;
+        $array = $this->collections;
 
         if (is_null($path)) {
             return $array;
@@ -246,27 +246,27 @@ class Data implements \ArrayAccess, \Iterator, \Countable {
         if (is_array($key)) {
             switch(count($key)) {
                 case 1:
-                    $this->_collections[$key[0]] = $value;
+                    $this->collections[$key[0]] = $value;
 
                     break;
 
                 case 2:
-                    $this->_collections[$key[0]][$key[1]] = $value;
+                    $this->collections[$key[0]][$key[1]] = $value;
 
                     break;
 
                 case 3:
-                    $this->_collections[$key[0]][$key[1]][$key[2]] = $value;
+                    $this->collections[$key[0]][$key[1]][$key[2]] = $value;
 
                     break;
 
                 case 4:
-                    $this->_collections[$key[0]][$key[1]][$key[2]][$key[3]] = $value;
+                    $this->collections[$key[0]][$key[1]][$key[2]][$key[3]] = $value;
 
                     break;
             }
         } else {
-            $this->_collections[$key] = $value;
+            $this->collections[$key] = $value;
         }
     }
 }

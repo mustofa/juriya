@@ -58,7 +58,7 @@ class Juriya {
 	 *
 	 * @return void
 	 */
-	function __construct($config = array())
+	function __construct(Collection $config)
 	{
 		// Initialize system once
 		if ( ! empty($config) && self::initStatus() == FALSE) {
@@ -66,7 +66,7 @@ class Juriya {
 			defined('STDIN') and self::$method = 'CLI';
 
 			// Configure
-			self::configure($config);
+			self::configure($config->get('configuration'));
 			self::init();
 		} else {
 			throw new \Exception('Cannot start Juriya proccess without proper configuration');
@@ -80,8 +80,13 @@ class Juriya {
 	 */
 	public function execute()
 	{
+		// Prepare request configuration
+		$config = new Collection();
+		$config->set('controller', PATH_SYS . PATH_CLASS . 'controller' . EXT);
+		$config->set('method', self::$method);
+
 		// Create a new request and output the response
-		$instance = new Request();
+		$instance = new Request($config);
 
 		return $instance->route()->execute();
 	}
@@ -91,10 +96,10 @@ class Juriya {
 	 *
 	 * @return  void
 	 */
-	public static function configure($configs)
+	public static function configure(Array $configs)
 	{
 		//  Instantiate new collection
-		self::$config = new Data();
+		self::$config = new Collection();
 
 		// Lifted and populate all configuration
 		$configs = array_map(function ($item) use (&$configs) {
@@ -414,8 +419,8 @@ class Juriya {
 			}
 
 			$namespaces[]   = NS_SYS and $paths[] = PATH_SYS;
-			self::$ns       = new Data($namespaces) 
-			and self::$path = new Data($paths);
+			self::$ns       = new Collection($namespaces) 
+			and self::$path = new Collection($paths);
 		} elseif (self::$ns instanceof Data && self::$path instanceof Data) {
 			$namespaces = self::$ns->get() and $paths = self::$path->get();
 		} else {

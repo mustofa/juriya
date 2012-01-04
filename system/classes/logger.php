@@ -114,8 +114,8 @@ class Logger {
 	{
 		if (self::$init == FALSE or ! isset(self::$profiler[$identifier])) {
 			self::$init = TRUE;
-			self::$profiler[$identifier] = new Data()
-			and self::$log[$identifier]  = new Data();
+			self::$profiler[$identifier] = new Collection()
+			and self::$log[$identifier]  = new Collection();
 
 			return;
 		}

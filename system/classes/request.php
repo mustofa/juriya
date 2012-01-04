@@ -14,13 +14,25 @@
 class Request {
 
 	/**
+	 * @var string Runtime environment
+	 */
+	public $method;
+
+	/**
 	 * @var object Routes information for corresponding request
 	 */
 	public $routes;
 
-	function __construct()
+	function __construct(Collection $config)
 	{
-		include_once PATH_SYS . PATH_CLASS . 'controller' . EXT;
+		// Initialize the request
+		if ($config->valid()) {
+			// Get the environment runtime
+			$this->method = $config->get('method');
+			include_once    $config->get('controller');
+		} else {
+			throw new \Exception('Cannot start Request without proper configuration');
+		}
 	}
 
 	/**
@@ -37,7 +49,7 @@ class Request {
 	public static function factory($controller)
 	{
 		if (($fragments = explode('.', $controller)) && count($fragments) == 2) {
-		    //$sub = array_shift($)
+			
 		    $ns = NS_MOD . ucfirst($fragments[0]) . '\\';
 		    
 			if (($class_name = $ns . 'Controllers\\' . $fragments[1]) && class_exists($class_name)) {
@@ -61,7 +73,15 @@ class Request {
 	 */
 	public function route()
 	{
-		$this->routes = Juriya::factory('Router')->detect();
+		// Set router configuration
+		$config = new Collection();
+		$config->set('server', $_SERVER);
+		$config->set('tunnel', $this->method);
+		$config->set('executor', 'execute' . ucfirst(strtolower($this->method)));
+
+		// Instantiate and execute new routing process
+		$router       = new Router($config);
+		$this->routes = $router->detect();
 
 		return $this;
 	}
