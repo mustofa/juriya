@@ -41,18 +41,6 @@ class Hello extends Controller{
 	 */
 	public function executeHttp($arg1 = NULL, $arg2 = NULL)
 	{
-		/* Mock up clashes class name */
-
-		// require PATH_APP . PATH_CLASS . 'juriya' . EXT;
-
-		// $mockupAccident = new \App\Juriya();
-		// $mockupAccident->say();
-
-		// require PATH_APP . PATH_CLASS . 'controller' . EXT;
-
-		// $mockupAccident = new \Controller();
-		// $mockupAccident->say();
-		
 		/* Logger mechanism while an executor is running */
 
 		// log_start(__CLASS__);
