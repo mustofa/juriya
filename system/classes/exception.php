@@ -146,8 +146,7 @@ class Exception {
 		$file     = str_replace($realpath, $fakepath, $file);
 
 		// Filtering non-useful fraction and send the message
-		if (preg_match('/\[([^\n]+):/', $message, $matches) 
-		    and count($matches) == 2) {
+		if (preg_match('/\[([^\n]+):/', $message, $matches) && count($matches) == 2) {
 			$message = str_replace($matches[0], ':', $message);
 		}
 

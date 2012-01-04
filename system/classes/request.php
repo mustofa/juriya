@@ -27,8 +27,8 @@ class Request {
 	 * Manufacturing Controller
 	 *
 	 * Prototype :
-	 *		Request::factory('foo');            // Return \App\Controllers\Foo
-	 *		Request::factory('foo.bar');        // Return \Mod\Foo\Controllers\Bar
+	 * 	Request::factory('foo');            // Return \App\Controllers\Foo
+	 *	Request::factory('foo.bar');        // Return \Mod\Foo\Controllers\Bar
 	 *
 	 * @param   string  controller name or path
 	 * @throws  object  Juriya exception
@@ -36,20 +36,17 @@ class Request {
 	 */
 	public static function factory($controller)
 	{
-		if (($fragments = explode('.', $controller))
-		    and count($fragments) == 2) {
+		if (($fragments = explode('.', $controller)) && count($fragments) == 2) {
 		    //$sub = array_shift($)
 		    $ns = NS_MOD . ucfirst($fragments[0]) . '\\';
 		    
-		    if (($class_name = $ns . 'Controllers\\' . $fragments[1])
-				    and class_exists($class_name)) {
-			    	return new $class_name;
+			if (($class_name = $ns . 'Controllers\\' . $fragments[1]) && class_exists($class_name)) {
+				return new $class_name;
 			}
 		} else {
 			foreach (Juriya::$ns as $ns) {
-				if (($class_name = $ns . 'Controllers\\' . $controller)
-				    and class_exists($class_name)) {
-			    	return new $class_name;
+				if (($class_name = $ns . 'Controllers\\' . $controller) && class_exists($class_name)) {
+					return new $class_name;
 			    }
 			}
 		}

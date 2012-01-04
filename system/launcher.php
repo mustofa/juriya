@@ -18,9 +18,9 @@ define('PATH_CLASS', 'classes' . DIRECTORY_SEPARATOR);
 define('PATH_LIB',   'lib' . DIRECTORY_SEPARATOR);
 
 // Define frameworks namespaces
-define('NS_APP', '\\App\\');
-define('NS_MOD', '\\Mod\\');
-define('NS_SYS', '\\Juriya\\');
+define('NS_APP', 'App\\');
+define('NS_MOD', 'Mod\\');
+define('NS_SYS', 'Juriya\\');
 
 // Define PHP extension
 define('EXT', '.php');
@@ -55,7 +55,7 @@ require_once PATH_SYS . PATH_CLASS . 'logger' . EXT;
 require_once PATH_SYS . PATH_CLASS . PATH_LIB . 'socket' . EXT;
 
 // Import core class
-use \Juriya\Juriya;
+use Juriya\Juriya;
 
 /**
  *---------------------------------------------------------------
@@ -74,8 +74,8 @@ set_exception_handler(function($e) {
 });
 
 set_error_handler(function($errno, $errstr, $errfile, $errline) {
-	$error = array($errno, $errstr, $errfile, $errline);
-	\Juriya\Exception::make($error)->handleError();
+	$e = array($errno, $errstr, $errfile, $errline);
+	\Juriya\Exception::make($e)->handleError();
 });
 
 // Register shutdown handler
@@ -94,60 +94,21 @@ register_shutdown_function(function() {
 
 /**
  *---------------------------------------------------------------
- * Load configuration and set appropriate behaviour
- *---------------------------------------------------------------
- */
-// config pool
-$configs = array();
-
-// Iterate over all possible paths
-foreach (array(PATH_APP, PATH_SYS) as $path) {
-	// Set config path and scan the directory
-	$config = $path . 'config' . DIRECTORY_SEPARATOR;
-	Juriya::$temp = $config;
-	is_dir($config) and $files = scandir($config);
-
-	if (isset($files) and ! is_null($files)) {
-		// Walk through files and extract config if exists
-		array_walk($files, function(&$file, $i) use(&$files) { 
-			// Only capture ini file
-			if (substr($file, -3, 3) == 'ini') {
-				$file = parse_ini_file(Juriya::$temp . $file, TRUE);
-			} else {
-				unset($files[$i]);
-			}
-		});
-
-		// Assign config collection into config pool
-		$configs = array_merge($configs, $files);
-	}
-
-	// Reset 
-	unset($path, $config, $files);
-}
-
-// Configure Juriya 
-Juriya::configure($configs);
-
-// Reset 
-unset($configs);
-
-/**
- *---------------------------------------------------------------
  * Define framework low-level functions
  *---------------------------------------------------------------
  */
  // Debugger method
 function debug() {
 	$vars   = func_get_args();
-	echo call_user_func_array(array('\Juriya\Juriya', 'debug'), $vars);
+	echo call_user_func_array(array('\\Juriya\\Juriya', 'debug'), $vars);
 }
 
 // Logger methods
 function log_start() {
 	if (func_num_args() === 1) {
 		$class = func_get_args();
-		return call_user_func_array(array('\Juriya\Logger', 'start'), $class);
+
+		return call_user_func_array(array('\\Juriya\\Logger', 'start'), $class);
 	} 
 	
 	throw new Exception('Cannot start log process for undefined class');
@@ -156,7 +117,8 @@ function log_start() {
 function log_stop() {
 	if (func_num_args() === 1) {
 		$class = func_get_args();
-		return call_user_func_array(array('\Juriya\Logger', 'stop'), $class);
+
+		return call_user_func_array(array('\\Juriya\\Logger', 'stop'), $class);
 	} 
 	
 	throw new Exception('Cannot stop log process for undefined class');
@@ -165,7 +127,8 @@ function log_stop() {
 function log_report() {
 	if (func_num_args() === 1) {
 		$class = func_get_args();
-		return call_user_func_array(array('\Juriya\Logger', 'report'), $class);
+
+		return call_user_func_array(array('\\Juriya\\Logger', 'report'), $class);
 	} 
 	
 	throw new Exception('Cannot report log process for undefined class');
@@ -174,7 +137,8 @@ function log_report() {
 function log_write() {
 	if (func_num_args() >= 2) {
 		$log = func_get_args();
-		return call_user_func_array(array('\Juriya\Logger', 'write'), $log);
+
+		return call_user_func_array(array('\\Juriya\\Logger', 'write'), $log);
 	} 
 	
 	throw new Exception('Cannot write log process for undefined class');
@@ -182,11 +146,48 @@ function log_write() {
 
 /**
  *---------------------------------------------------------------
+ * Load configuration and instantiate new launcher
+ *---------------------------------------------------------------
+ */
+// config pool
+$configs = array();
+
+// Set config path and scan the directory
+$path    = PATH_APP;
+$config  = $path . 'config' . DIRECTORY_SEPARATOR;
+is_dir($config) and $files = scandir($config);
+
+if (isset($files) && ! is_null($files)) {
+	// Walk through files and extract config if exists
+	array_walk($files, function(&$file, $i) use(&$files) { 
+		// Only capture ini file
+		global $config;
+
+		if (substr($file, -3, 3) == 'ini') {
+			$file = parse_ini_file($config . $file, TRUE);
+		} else {
+			unset($files[$i]);
+		}
+	});
+
+	// Assign config collection into config pool
+	$configs = $files;
+}
+
+// Reset all vars
+unset($path, $config, $files);
+
+// Instantiate new launcher
+$launcher = new Juriya($configs);
+
+// Reset configs value
+unset($configs);
+
+/**
+ *---------------------------------------------------------------
  * Launch program.
  *---------------------------------------------------------------
  */
-// Instantiate new launcher
-$launcher = new Juriya();
 
 // Execute the application
 $launcher->execute();

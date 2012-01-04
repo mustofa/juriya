@@ -49,6 +49,11 @@ class Router {
 	public $arguments;
 
 	/**
+	 * @var array Matched route
+	 */
+	public static $route = array();
+
+	/**
 	 * Constructor
 	 *
 	 * @return void
@@ -118,41 +123,12 @@ class Router {
 			}
 
 			// Iterate each routes and find matching pattern
-			foreach ($routes as $route_name => $route) {
-				// Only start checking if argument count matched
-				if (count($arguments)  == count($route['arguments'])) {
-					if (($intersection = array_intersect($arguments, $route['arguments'])) 
-					    and $arguments == $intersection ) {
-						// Routes and arguments are literary identical
-						$this->controller = $routes[$route_name]['controller'];
-					} else {
-						// Perform regular expression to catch matched route
-						Juriya::$temp = TRUE;
+			array_walk($routes, 'Juriya\\Router::_findRoute', $arguments);
 
-						array_map(function($pattern, $elem) {
-							if ( ! empty($pattern) and ! empty($elem)) {
-								substr($pattern, 0, 1)  == '/' or $pattern  = '/' . $pattern;
-								substr($pattern, -1, 1) == '/' or $pattern .= '/';
-								preg_match($pattern, $elem, $matches);
-
-								if ( ! empty($matches) 
-								    and FALSE !== array_shift($matches)
-								    and FALSE !== Juriya::$temp) {
-									Juriya::$temp = TRUE;
-								} else {
-									Juriya::$temp = FALSE;
-								}
-							}
-
-						}, $route['arguments'], $arguments);
-
-						if (Juriya::$temp) {
-							// Set match controller and matched arguments
-							$this->controller  = $routes[$route_name]['controller'];
-							$this->arguments = $arguments;
-						}
-					}
-				}
+			// Inspect the result
+			if ( ! empty(self::$route)) {
+				$this->controller = self::$route['controller'];
+				$this->arguments  = self::$route['arguments'];
 			}
 		}
 		
@@ -240,6 +216,48 @@ class Router {
 					Juriya::$input = $input;
 
 					break;
+			}
+		}
+	}
+
+	protected function _findRoute(&$route, $name, $arguments)
+	{
+		// Only start checking if argument count matched
+		if (count($arguments)  == count($route['arguments'])) {
+			if (($intersection = array_intersect($arguments, $route['arguments'])) 
+			    and $arguments == $intersection ) {
+				// Routes and arguments are literary identical
+				self::$route['controller'] = $route['controller'];
+				self::$route['arguments']  = $arguments;
+			} else {
+				// Perform regular expression to catch matched route
+				$results =  array_map(function($pattern, $elem) {
+					if ( ! empty($pattern) and ! empty($elem)) {
+						substr($pattern, 0, 1)  == '/' or $pattern  = '/' . $pattern;
+						substr($pattern, -1, 1) == '/' or $pattern .= '/';
+						preg_match($pattern, $elem, $matches);
+
+						return ( ! empty($matches) && FALSE !== array_shift($matches));
+					}
+
+				}, $route['arguments'], $arguments);
+
+				// Determine the result
+				$success = TRUE;
+
+				foreach ($results as $result) {
+					if ($result == FALSE) {
+						$success = FALSE;
+
+						continue;
+					}
+				}
+
+				if ($success) {
+					// Set match controller and matched arguments
+					self::$route['controller'] = $route['controller'];
+					self::$route['arguments']  = $arguments;
+				}
 			}
 		}
 	}

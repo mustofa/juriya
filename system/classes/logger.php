@@ -33,7 +33,7 @@ class Logger {
 	/**
 	 * @var bool Logger status
 	 */
-	private static $_init;
+	private static $init;
 
 	/**
 	 * Report all logger data with appropriate output
@@ -92,14 +92,16 @@ class Logger {
 		self::check($identifier);
 		$pointers     = array('time', 'memory');
 		$values       = array(microtime(TRUE), memory_get_usage(TRUE));
-		Juriya::$temp = $identifier;
+		$identifiers  = array_fill(0, 2, $identifier);
 
-		array_map(function($pointer, $value) {
-			$start   = Logger::$profiler[Juriya::$temp][$pointer . '_start'];
+		array_map(function($pointer, $value, $identifier) {
+			$start   = Logger::$profiler[$identifier][$pointer . '_start'];
 			$elapsed = $value - $start;
-			Logger::$profiler[Juriya::$temp]->set($pointer . '_end', $value);
-			Logger::$profiler[Juriya::$temp]->set($pointer . '_elapsed', $elapsed);
-		}, $pointers, $values);
+			Logger::$profiler[$identifier]->set($pointer . '_end', $value);
+			Logger::$profiler[$identifier]->set($pointer . '_elapsed', $elapsed);
+		}, $pointers, $values, $identifiers);
+
+		unset($pointers, $values, $identifiers);
 	}
 
 	/**
@@ -110,8 +112,8 @@ class Logger {
 	 */
 	public static function check($identifier)
 	{
-		if (self::$_init == FALSE or ! isset(self::$profiler[$identifier])) {
-			self::$_init = TRUE;
+		if (self::$init == FALSE or ! isset(self::$profiler[$identifier])) {
+			self::$init = TRUE;
 			self::$profiler[$identifier] = new Data()
 			and self::$log[$identifier]  = new Data();
 

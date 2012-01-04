@@ -58,12 +58,18 @@ class Juriya {
 	 *
 	 * @return void
 	 */
-	function __construct()
+	function __construct($config = array())
 	{
 		// Initialize system once
-		if (self::initStatus() == FALSE) {
+		if ( ! empty($config) && self::initStatus() == FALSE) {
+			// Get the environment runtime
 			defined('STDIN') and self::$method = 'CLI';
+
+			// Configure
+			self::configure($config);
 			self::init();
+		} else {
+			throw new \Exception('Cannot start Juriya proccess without proper configuration');
 		}
 	}
 
@@ -75,7 +81,7 @@ class Juriya {
 	public function execute()
 	{
 		// Create a new request and output the response
-		$instance = self::factory('Request');
+		$instance = new Request();
 
 		return $instance->route()->execute();
 	}
@@ -88,27 +94,25 @@ class Juriya {
 	public static function configure($configs)
 	{
 		//  Instantiate new collection
-		self::$config = self::factory('Data');
+		self::$config = new Data();
 
 		// Lifted and populate all configuration
 		$configs = array_map(function ($item) use (&$configs) {
 		    next($configs);
-		    Juriya::$temp = $index = key($item)
-		    and $values   = $item;
+		    
+		    $values = $item;
+		    $index  = array_fill(0, count($values), key($item));
 
 		    // Scan the level and inspect mathced cursor
-		    $values = array_map(function ($sub_items) use (&$values) {
+		    $values = array_map(function ($sub_items, $parent_index) use (&$values, $index) {
 		    	next($values);
-		    	$index = Juriya::$temp;
 
 		    	foreach ($sub_items as $sub_index => $sub_item) {
-		    		$index = (array) Juriya::$temp;
+		    		$index = (array) $parent_index;
 		    		$keys  = explode('.', $sub_index);
 		    		Juriya::$config->set(array_merge($index, $keys), $sub_item);
 		    	}
-		    }, $values);
-
-		    Juriya::$temp = NULL;
+		    }, $values, $index);
 
 		    return FALSE;
 		}, $configs);
@@ -166,15 +170,18 @@ class Juriya {
 		// Itterate over provided paths and include if the class exists
 		foreach ($paths as $path) {
 			$file = $path . PATH_CLASS . strtolower($class_name) . EXT;
-
+			//debug($file);
 			if (($class_file = $file) and file_exists($class_file)) {
-				include_once $file;
+				//debug($class_file);
+				include_once $class_file;
 				$loaded = TRUE;
 
 				continue;
 			}
 		}
-
+		
+		unset($file, $class_file);
+		
 		// Check result and log appropriate warning if not exist
 		if ( ! $loaded) {
 			$e       = new \Exception();
@@ -213,8 +220,7 @@ class Juriya {
 
 		// Itterate over the namespace and instantiate requested class
 		foreach ($namespaces as $namespace) {
-			if (($class_name = $namespace . $class) 
-				 and class_exists($class_name)) {
+			if (($class_name = $namespace . $class) && class_exists($class_name)) {
 				return (is_null($params)) ? new $class_name : new $class_name($params);
 			}
 		}
@@ -269,7 +275,7 @@ class Juriya {
 			return '<small>' . $var . '</small>';
 		};
 
-		$span = function($var) {
+		$span  = function($var) {
 			return '<span>(' . $var . ')</span>';
 		};
 
@@ -315,10 +321,10 @@ class Juriya {
 
 			if (empty($var)) {
 				// Do nothing
-			} elseif (isset($var[$marker]) and ! empty($var)) {
+			} elseif (isset($var[$marker]) && ! empty($var)) {
 				$output[] = "(\n$space$s*RECURSION*\n$space)";
 			} elseif ($level < 5) {
-				$output[] = "<span>(";
+				$output[]     = "<span>(";
 				$var[$marker] = TRUE;
 
 				foreach ($var as $key => &$val) {
@@ -398,20 +404,19 @@ class Juriya {
 	protected static function _namespacePath()
 	{
 		// Register namespaces
-		if (self::initStatus() and self::$config->get('MODULES') 
-		    and is_null(self::$ns)) {
+		if (self::initStatus() && self::$config->get('MODULES') && is_null(self::$ns)) {
 			$namespaces = array(NS_APP) and $paths = array(PATH_APP);
 			$modules    = self::$config->get('MODULES');
 			
 			foreach ($modules as $module => $params) {
-				$namespaces[] = '\\' . $params['namespace'] . '\\';
+				$namespaces[] = $params['namespace'] . '\\';
 				$paths[]      = $params['path'];
 			}
 
 			$namespaces[]   = NS_SYS and $paths[] = PATH_SYS;
 			self::$ns       = new Data($namespaces) 
 			and self::$path = new Data($paths);
-		} elseif (self::$ns instanceof Data and self::$path instanceof Data) {
+		} elseif (self::$ns instanceof Data && self::$path instanceof Data) {
 			$namespaces = self::$ns->get() and $paths = self::$path->get();
 		} else {
 			$namespaces = array(NS_APP, NS_SYS);
