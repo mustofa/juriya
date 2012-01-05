@@ -14,7 +14,7 @@
 class Request {
 
 	/**
-	 * @var string Runtime environment
+	 * @var instance Runtime environment
 	 */
 	public $method;
 
@@ -46,19 +46,37 @@ class Request {
 	 * @throws  object  Juriya exception
 	 * @return  object  controller interface
 	 */
-	public static function factory($controller)
+	public static function factory($controller = '')
 	{
 		if (($fragments = explode('.', $controller)) && count($fragments) == 2) {
 			
 		    $ns = NS_MOD . ucfirst($fragments[0]) . '\\';
 		    
 			if (($class_name = $ns . 'Controllers\\' . $fragments[1]) && class_exists($class_name)) {
-				return new $class_name;
+				$controller_class = new $class_name();
+
+				// Load corresponding model or/and view classes
+				if (($model_name = $ns . 'Models\\' . $fragments[1]) && class_exists($model_name)) {
+					$controller_class->model = new $model_name();
+				}
+
+				$controller_class->view = Juriya::factory('View');
+
+				return $controller_class;
 			}
 		} else {
 			foreach (Juriya::$ns as $ns) {
 				if (($class_name = $ns . 'Controllers\\' . $controller) && class_exists($class_name)) {
-					return new $class_name;
+					$controller_class = new $class_name();
+
+					// Load corresponding model or/and view classes
+					if (($model_name = $ns . 'Models\\' . $controller) && class_exists($model_name)) {
+						$controller_class->model = new $model_name();
+					}
+
+					$controller_class->view = Juriya::factory('View');
+
+					return $controller_class;
 			    }
 			}
 		}
@@ -80,7 +98,7 @@ class Request {
 		$config->set('executor', 'execute' . ucfirst(strtolower($this->method)));
 
 		// Instantiate and execute new routing process
-		$router       = new Router($config);
+		$router       = Juriya::factory('Router', $config);
 		$this->routes = $router->detect();
 
 		return $this;

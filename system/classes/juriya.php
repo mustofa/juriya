@@ -86,7 +86,7 @@ class Juriya {
 		$config->set('method', self::$method);
 
 		// Create a new request and output the response
-		$instance = new Request($config);
+		$instance = self::factory('Request', $config);
 
 		return $instance->route()->execute();
 	}
@@ -159,7 +159,6 @@ class Juriya {
 	 * Autoloader
 	 *
 	 * @param   string  class path
-	 * @throws  Juriya exception
 	 * @return  mixed
 	 */
 	public static function autoload($class)
@@ -175,9 +174,8 @@ class Juriya {
 		// Itterate over provided paths and include if the class exists
 		foreach ($paths as $path) {
 			$file = $path . PATH_CLASS . strtolower($class_name) . EXT;
-			//debug($file);
+
 			if (($class_file = $file) and file_exists($class_file)) {
-				//debug($class_file);
 				include_once $class_file;
 				$loaded = TRUE;
 
@@ -195,7 +193,7 @@ class Juriya {
 			// Loop over tracer, to see whether the error is really valid
 			foreach($e->getTrace() as $trace) {
 				// We expect that this was just to check
-				if ($trace['function'] == 'class_exists') {
+				if ($trace['function'] == 'class_exists' || $trace['function'] == 'file_exists') {
 					$valid_e = FALSE;
 					Logger::write(__CLASS__, $class . ' not found.', 2);
 
@@ -203,9 +201,9 @@ class Juriya {
 				}
 			}
 
-			// Throw exception
+			// Write error, and let further existed autoloader process it
 			if ($valid_e) {
-				throw new \Exception($class . ' not found.');
+				Logger::write(__CLASS__, $class . ' not found.', 3);
 			}
 		}
 	}

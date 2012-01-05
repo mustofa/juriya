@@ -10,12 +10,13 @@ define('ENVIRONMENT', $environment);
 
 // Define frameworks paths
 define('PATH_APP',   realpath($application) . DIRECTORY_SEPARATOR);
-define('PATH_MOD',   realpath($modules) . DIRECTORY_SEPARATOR);
-define('PATH_SYS',   realpath($system) . DIRECTORY_SEPARATOR);
+define('PATH_MOD',   realpath($modules)     . DIRECTORY_SEPARATOR);
+define('PATH_PKG',   realpath($packages)    . DIRECTORY_SEPARATOR);
+define('PATH_SYS',   realpath($system)      . DIRECTORY_SEPARATOR);
 
 // Common sub-paths
 define('PATH_CLASS', 'classes' . DIRECTORY_SEPARATOR);
-define('PATH_LIB',   'lib' . DIRECTORY_SEPARATOR);
+define('PATH_LIB',   'lib'     . DIRECTORY_SEPARATOR);
 
 // Define frameworks namespaces
 define('NS_APP', 'App\\');

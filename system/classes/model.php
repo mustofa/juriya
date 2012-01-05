@@ -13,4 +13,20 @@
 
 class Model {
 
+	/**
+	 * @var object Database instance
+	 */
+	public $db;
+
+	function __construct()
+	{
+		// Include NotORM packages, configure DB param and instantiate new DB
+		include_once PATH_PKG . 'notorm' . DIRECTORY_SEPARATOR . 'NotORM' . EXT;
+		$pdo = new \PDO('mysql:host=localhost;dbname=juriya',
+	                    'juriya',
+	                    'juriya');
+
+		$this->db  = new \NotORM($pdo);
+	}
+
 }

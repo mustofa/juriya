@@ -14,9 +14,18 @@
 class Controller implements Socket{
 
 	/**
+	 * @var object Corresponding model instance
+	 */
+	public $model;
+
+	/**
+	 * @var object Corresponding view instance
+	 */
+	public $view;
+
+	/**
 	 * Empty response
 	 * 
-	 * @access public
 	 * @return string
 	 */
 	public function executeHttp()
@@ -27,7 +36,6 @@ class Controller implements Socket{
 	/**
 	 * Empty response
 	 * 
-	 * @access public
 	 * @return string
 	 */
 	public function executeCli()
