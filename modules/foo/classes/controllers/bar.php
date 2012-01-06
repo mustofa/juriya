@@ -14,6 +14,8 @@
 use \Juriya\Juriya;
 use \Juriya\Controller;
 use \Juriya\Request;
+use \Juriya\Response\Http;
+use \Juriya\Response\Cli;
 
 class Bar extends Controller {
 	
