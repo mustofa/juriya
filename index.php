@@ -16,6 +16,7 @@
  * 
  * Values        | Description    
  * --------------|-----------------------------------------------
+ * `test`        | Unit Testing environment
  * `development` | Development environment
  * `production`  | Production environment
  */

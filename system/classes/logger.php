@@ -41,16 +41,27 @@ class Logger {
 	 * @param   mixed
 	 * @return  mixed
 	 */
-	public static function report($identifier = NULL)
+	public static function report()
 	{
-		if (is_null($identifier)) {
-			echo Juriya::debug(self::$profiler, self::$log);
-		} else {
-			self::$profiler[$identifier]->ksortDesc();
-			$profiler   = self::$profiler[$identifier];
-			$log        = self::$log[$identifier];
-			echo Juriya::debug($profiler, $log);
+		$logs       = array();
+		$profiler   = self::$profiler;
+		$log        = self::$log;
+		
+		foreach ($log as $header => $content) {
+			$lines   = str_repeat('=', strlen($header)) . "\n";
+			$message = $lines . $header . "\n" . $lines;
+
+			foreach ($content as $line) {
+				$timestamp = key($line);
+				$message  .= $timestamp . '-' . $line[$timestamp] . "\n";
+			}
+			
+			$logs[] = $message;
 		}
+
+		$path   = PATH_APP . 'log' . DIRECTORY_SEPARATOR . date('Y-m-d') . '.txt';
+		$report = implode("\n", $logs);
+		File::append($path, $report);
 	}
 
 	/**

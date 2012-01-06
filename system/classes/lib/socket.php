@@ -14,18 +14,23 @@
 interface Socket {
 
 	/**
+	 * All socket classes must have execute method
+	 * 
+	 * @return mixed  
+	 */
+	public function execute();
+
+	/**
 	 * All socket classes must have HTTP execute method
 	 * 
-	 * @access public
-	 * @return string
+	 * @return response HTTP response
 	 */
 	public function executeHttp();
 
 	/**
 	 * All socket classes must have CLI execute method
 	 * 
-	 * @access public
-	 * @return string
+	 * @return response CLI Response
 	 */
 	public function executeCli();
 	

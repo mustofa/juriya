@@ -49,12 +49,13 @@ ini_set('display_errors', 'Off');
  * Load main framework handler.
  *---------------------------------------------------------------
  */
-// Load main core handler classes
+// Load main core handler classes component
 require_once PATH_SYS . PATH_CLASS . 'juriya' . EXT;
 require_once PATH_SYS . PATH_CLASS . 'exception' . EXT;
 require_once PATH_SYS . PATH_CLASS . 'logger' . EXT;
 require_once PATH_SYS . PATH_CLASS . PATH_LIB . 'socket' . EXT;
 require_once PATH_SYS . PATH_CLASS . PATH_LIB . 'data' . EXT;
+require_once PATH_SYS . PATH_CLASS . PATH_LIB . 'output' . EXT;
 
 /**
  *---------------------------------------------------------------
@@ -120,7 +121,7 @@ function log_start() {
 		return call_user_func_array(array('\\Juriya\\Logger', 'start'), $class);
 	} 
 	
-	throw new Exception('Cannot start log process for undefined class');
+	throw new InvalidArgumentException('Cannot start log process for undefined class');
 }
 
 function log_stop() {
@@ -130,17 +131,7 @@ function log_stop() {
 		return call_user_func_array(array('\\Juriya\\Logger', 'stop'), $class);
 	} 
 	
-	throw new Exception('Cannot stop log process for undefined class');
-}
-
-function log_report() {
-	if (func_num_args() === 1) {
-		$class = func_get_args();
-
-		return call_user_func_array(array('\\Juriya\\Logger', 'report'), $class);
-	} 
-	
-	throw new Exception('Cannot report log process for undefined class');
+	throw new InvalidArgumentException('Cannot stop log process for undefined class');
 }
 
 function log_write() {
@@ -150,7 +141,7 @@ function log_write() {
 		return call_user_func_array(array('\\Juriya\\Logger', 'write'), $log);
 	} 
 	
-	throw new Exception('Cannot write log process for undefined class');
+	throw new InvalidArgumentException('Cannot write log process for undefined class');
 }
 
 /**
@@ -171,16 +162,14 @@ is_dir($config) and $files = scandir($config);
 
 if (isset($files) && ! is_null($files)) {
 	// Walk through files and extract config if exists
-	array_walk($files, function(&$file, $i) use(&$files) { 
-		// Only capture ini file
-		global $config;
+	array_walk($files, function(&$file, $i, $config) use(&$files) { 
 
 		if (substr($file, -3, 3) == 'ini') {
 			$file = parse_ini_file($config . $file, TRUE);
 		} else {
 			unset($files[$i]);
 		}
-	});
+	}, $config);
 
 	// Assign config collection into config pool
 	$configs = $files;
@@ -206,4 +195,6 @@ unset($bootstrap, $config, $configs);
  */
 
 // Execute the application
-$launcher->execute();
+if (ENVIRONMENT != 'test') {
+	$launcher->execute();
+}

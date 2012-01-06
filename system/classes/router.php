@@ -66,7 +66,7 @@ class Router {
 			$this->executor  = $config->get('executor');
 			$this->arguments = array();
 		} else {
-			throw new \Exception('Cannot start Router process without proper configuration');
+			throw new \RuntimeException('Cannot start Router process without proper configuration');
 		}
 	}
 
@@ -137,7 +137,7 @@ class Router {
 		}
 		
 		// If requested controller still not found, check class existance
-		if (is_null($this->controller)) {
+		if (is_null($this->controller) and ! empty($arguments)) {
 			// Looking whether the request is asking for sub-controller or modules
 			if (count($arguments) >= 2) {
 
@@ -184,7 +184,7 @@ class Router {
 			}
 			
 			if (is_null($this->controller)) {
-				throw new \Exception('Request not found');
+				throw new \DomainException('Request not found for ' . implode('/', $arguments));
 			}
 		}
 		

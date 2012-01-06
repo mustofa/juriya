@@ -14,9 +14,30 @@
 use \Juriya\Juriya;
 use \Juriya\Controller;
 use \Juriya\Request;
+use \Juriya\Response\Http;
+use \Juriya\Response\Cli;
 
 class Hello extends Controller{
 	
+	/**
+	 * Serve HMVC or/and Unit Testing
+	 *
+	 * This `Hello` controller `execute` will invoked,
+	 * if there are the following calls :
+	 * 
+	 * 1. From HMVC tunnel, which mean call came from something like:
+	 * $hello = Request::factory('hello')->execute();
+	 *
+	 * 2. Unit testing request which contain bellow server argument :
+	 * $_SERVER['argv'] = array('hello');
+	 *
+	 * @return mixed
+	 */
+	public function execute($arg1 = NULL, $arg2 = NULL)
+	{
+		return 'Hello World';
+	}
+
 	/**
 	 * Serve HTTP request
 	 * 
@@ -32,12 +53,12 @@ class Hello extends Controller{
 	 * which is `/hello_world/JURIYA` was matching with
 	 * sample routes rule, you can found under :
 	 * 
-	 * ./config/routes.conf.ini
+	 * ./application/config/routes.conf.ini
 	 *
 	 * If a route matched with request, then the matched argument(s)
 	 * will be passed through.
 	 *
-	 * @return string
+	 * @return response
 	 */
 	public function executeHttp($arg1 = NULL, $arg2 = NULL)
 	{
@@ -48,36 +69,47 @@ class Hello extends Controller{
 		// log_write(__CLASS__, 'Some Warning', 2);
 		// log_write(__CLASS__, 'Some Error', 3);
 		// log_write(__CLASS__, 'Just log');
-
-		echo 'Hello World';
-
-		// If the route matched, output the passed arguments
-		if ( ! empty($arg1) and ! empty($arg2)) {
-			echo '<hr />';
-			echo 'Argument 1 was :';
-			debug($arg1);
-			echo 'Argument 2 was :';
-			debug($arg2);
-		}
+		// log_stop(__CLASS__);
 
 		/* Calling modules controler */
 
-		// Request::factory('foo.bar')->executeHttp();
+		// $foobar = Request::factory('foo.bar')->execute();
 
-		/* Logger mechanism to stop and show log report */
+		$response = new Http();
+		$response->code(200);
+		$response->header(array('Content-Type' => 'text/html; charset=utf-8'));
+		$response->content('Hello World');
 
-		// log_stop(__CLASS__);
-		// log_report(__CLASS__);
+		return $response;
 	}
 
 	/**
 	 * Serve CLI execute method
 	 * 
-	 * @return string
+	 * This `Hello` controller `executeCli` will invoked,
+	 * if there are the following calls from Command-line :
+	 * 
+	 * $ php index.php hello
+	 * $ php index.php hello_world JURIYA
+	 *
+	 * While the first one is obvious, the second call
+	 * which is `php index.php hello_world JURIYA` was matching with
+	 * sample routes rule, you can found under :
+	 * 
+	 * ./application/config/routes.conf.ini
+	 *
+	 * If a route matched with request, then the matched argument(s)
+	 * will be passed through.
+	 * 
+	 * @return response
 	 */
-	public function executeCli()
+	public function executeCli($arg1 = NULL, $arg2 = NULL)
 	{
-		echo 'Hello World';
+		$response = new Cli();
+		$response->type('OUT');
+		$response->content('Hello World');
+
+		return $response;
 	}
 
 }

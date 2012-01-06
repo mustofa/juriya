@@ -54,7 +54,7 @@ class Exception {
 		} elseif(is_object($e)) {
 			$this->exception = $e;
 		} else {
-			throw new \Exception('Cannot handle exception/error');
+			throw new \RuntimeException('Cannot handle exception/error');
 		}
 	}
 

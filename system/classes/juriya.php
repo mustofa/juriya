@@ -56,6 +56,7 @@ class Juriya {
 	/**
 	 * Constructor
 	 *
+	 * @throws Exception 
 	 * @return void
 	 */
 	function __construct(Array $bootstrap, Collection $config)
@@ -72,7 +73,7 @@ class Juriya {
 			self::configure($config->get('configuration'));
 			self::init();
 		} else {
-			throw new \Exception('Cannot start Juriya proccess without proper configuration');
+			throw new \RuntimeException('Cannot start Juriya proccess without proper configuration');
 		}
 	}
 
@@ -132,6 +133,7 @@ class Juriya {
 	/**
 	 * Execute the program
 	 *
+	 * @throws  Exception 
 	 * @return  response  HTTP or CLI response
 	 */
 	public function execute()
@@ -151,7 +153,16 @@ class Juriya {
 		// Create a new request and output the response
 		$instance = self::factory('Request', $config);
 
-		return $instance->route()->execute();
+		$output = $instance->route()->execute();
+
+		// Determine the way to output the response
+		if (ENVIRONMENT == 'test') {
+			return $output;
+		} elseif ($output instanceof Output) {
+			$output->render();
+		} else {
+			throw new \RangeException('Invalid Output');
+		}
 	}
 
 	/**
@@ -255,7 +266,7 @@ class Juriya {
 		}
 
 		// throw Juriya expention
-		throw new \Exception('Class not exists');
+		throw new \LogicException('Class not exists');
 	}
 
 	/**

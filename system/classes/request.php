@@ -43,7 +43,7 @@ class Request {
 			self::$parser = $config->get('parser');
 			include_once    $config->get('controller');
 		} else {
-			throw new \Exception('Cannot start Request without proper configuration');
+			throw new \RuntimeException('Cannot start Request without proper configuration');
 		}
 	}
 
@@ -93,7 +93,7 @@ class Request {
 			}
 		}
 	
-		throw new \Exception('Controller not exists');
+		throw new \LogicException('Controller not exists');
 	}
 
 	/**
@@ -107,7 +107,14 @@ class Request {
 		$config = new Collection();
 		$config->set('server', $_SERVER);
 		$config->set('tunnel', $this->method);
-		$config->set('executor', 'execute' . ucfirst(strtolower($this->method)));
+
+		// Exception for Unit Testing environment
+		// Use the HMVC tunnel instead `HTTP` or `CLI`
+		if (ENVIRONMENT == 'test') {
+			$config->set('executor', 'execute');
+		} else {
+			$config->set('executor', 'execute' . ucfirst(strtolower($this->method)));
+		}
 
 		// Instantiate and execute new routing process
 		$router       = Juriya::factory('Router', $config);

@@ -1,5 +1,16 @@
 <?php
 
+/**
+ * Juriya - RAD PHP Framework
+ *
+ * Test case for Hello controller
+ *
+ * @package  Juriya
+ * @category Unit Test
+ * @version  0.0.1
+ * @author   Taufan Aditya
+ */
+
 class HelloTest extends PHPUnit_Framework_TestCase
 {
     /**
@@ -9,6 +20,7 @@ class HelloTest extends PHPUnit_Framework_TestCase
 
     public function setUp()
     {
+        // Grab the launcher which instantiated by bootstrap
         global $launcher;
 
         $this->launcher = $launcher;
@@ -18,16 +30,15 @@ class HelloTest extends PHPUnit_Framework_TestCase
 
     public function testHello()
     {
+        // Mimic a request which sent 'hello'
         $_SERVER['argv'] = array('hello');
 
-        ob_start();
+        // Get the response
+        $response = $this->launcher->execute();
 
-        $this->launcher->execute();
-
-        $response = ob_get_contents();
-
-        ob_end_clean();
-
+        // See corresponding controller method which serve this call : 
+        // File : ./application/classes/controllers/hello.php
+        // Line : 36
         $this->assertEquals('Hello World', $response);
     }
 }
