@@ -103,7 +103,7 @@ class Router {
 
 				break;
 		}
-
+		
 		// Remove front socket
 		$arguments = array_filter($arguments, function ($item) use (&$arguments) {
 		    next($arguments);
