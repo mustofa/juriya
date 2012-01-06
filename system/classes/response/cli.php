@@ -26,12 +26,12 @@ class Cli implements Output {
 	protected $content;
 
     /**
-	 * Constructor
-	 *
+     * Constructor
+     *
      * @param   string  CLI output type
      * @param   string  CLI content
-	 * @return  void
-	 */
+     * @return  void
+     */
 	function __construct($type = 'OUT', $content = '')
 	{
 		$this->type    = $type;

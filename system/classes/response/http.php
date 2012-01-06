@@ -77,12 +77,12 @@ class Http implements Output {
                                     509 => 'Bandwidth Limit Exceeded');
 
     /**
-	 * Constructor
-	 *
+     * Constructor
+     *
      * @param   int     HTTP code
      * @param   string  HTTP content
-	 * @return  void
-	 */
+     * @return  void
+     */
 	function __construct($code = 0, $content = '')
 	{
 		$this->headers = new Collection;
