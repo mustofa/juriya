@@ -27,7 +27,7 @@ define('NS_SYS', 'Juriya\\');
 define('EXT', '.php');
 
 // Unset global variable
-unset($environment, $application, $modules, $system);
+unset($environment, $application, $modules, $packages, $system);
 
 /**
  *---------------------------------------------------------------
@@ -155,10 +155,13 @@ function log_write() {
 
 /**
  *---------------------------------------------------------------
- * Load configuration and instantiate new launcher.
+ * Load bootstrap, configuration and instantiate new launcher.
  *---------------------------------------------------------------
  */
-// config pool
+// Bootstrap pool
+$bootstrap = include_once(PATH_APP . 'bootstrap' . EXT);
+
+// Config pool
 $configs = array();
 
 // Set config path and scan the directory
@@ -191,10 +194,10 @@ $config  = new Collection();
 $config->set('configuration', $configs);
 
 // Instantiate new launcher
-$launcher = new Juriya($config);
+$launcher = new Juriya($bootstrap, $config);
 
-// Reset configs value
-unset($config, $configs);
+// Reset bootstrap and configs value
+unset($bootstrap, $config, $configs);
 
 /**
  *---------------------------------------------------------------

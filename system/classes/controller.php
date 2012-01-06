@@ -1,7 +1,7 @@
 <?php namespace Juriya;
 
 /**
- * Juriya - RAD PHP 5 Micro Framework
+ * Juriya - RAD PHP Framework
  *
  * Base Controller interface
  *

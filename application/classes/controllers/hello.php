@@ -1,7 +1,7 @@
 <?php namespace App\Controllers;
 
 /**
- * Juriya - RAD PHP 5 Micro Framework
+ * Juriya - RAD PHP Framework
  *
  * Hello controller
  *

@@ -1,7 +1,7 @@
 <?php namespace Juriya;
 
 /**
- * Juriya - RAD PHP 5 Micro Framework
+ * Juriya - RAD PHP Framework
  *
  * Juriya core class
  *
@@ -19,9 +19,14 @@ class Juriya {
 	const VERSION = '0.0.1';
 
 	/**
+	 * @var array Juriya bootstrap
+	 */
+	public static $bootstrap;
+
+	/**
 	 * @var array Juriya configuration
 	 */
-	public static $config = array();
+	public static $config;
 
 	/**
 	 * @var array Request parameter
@@ -44,11 +49,6 @@ class Juriya {
 	public static $path;
 
 	/**
-	 * @var string Temporary data
-	 */
-	public static $temp = NULL;
-
-	/**
 	 * @var boolean Juriya initialization status
 	 */
 	private static $init = FALSE;
@@ -58,12 +58,15 @@ class Juriya {
 	 *
 	 * @return void
 	 */
-	function __construct(Collection $config)
+	function __construct(Array $bootstrap, Collection $config)
 	{
 		// Initialize system once
-		if ( ! empty($config) && self::initStatus() == FALSE) {
+		if ( ! empty($bootstrap) &&  ! empty($config) && self::initStatus() == FALSE) {
 			// Get the environment runtime
 			defined('STDIN') and self::$method = 'CLI';
+
+			// Register application bootstrap
+			self::register($bootstrap);
 
 			// Configure
 			self::configure($config->get('configuration'));
@@ -74,21 +77,21 @@ class Juriya {
 	}
 
 	/**
-	 * Execute the program
+	 * Register application bootstrap
 	 *
-	 * @return  response  HTTP or CLI response
+	 * @return  void
 	 */
-	public function execute()
+	public static function register(Array $bootstrap)
 	{
-		// Prepare request configuration
-		$config = new Collection();
-		$config->set('controller', PATH_SYS . PATH_CLASS . 'controller' . EXT);
-		$config->set('method', self::$method);
+		//  Instantiate new collection
+		self::$bootstrap = new Collection();
 
-		// Create a new request and output the response
-		$instance = self::factory('Request', $config);
+		// Register DB instance
+		self::$bootstrap->set('db',     $bootstrap['db']['prototype']());
+		self::$bootstrap->set('parser', $bootstrap['parser']['prototype']());
 
-		return $instance->route()->execute();
+		// Reset
+		unset($bootstrap);
 	}
 
 	/**
@@ -124,13 +127,31 @@ class Juriya {
 
 		// Reset
 		unset($configs);
+	}
 
-		// Only set if the aliases is enabled
-		if (self::$config->get('ALIASES.classes_alias') == '1') {
-			foreach (self::$config->get('ALIASES.classes') as $alias => $fullname) {
-				class_alias($fullname, $alias);
-			}
-		}
+	/**
+	 * Execute the program
+	 *
+	 * @return  response  HTTP or CLI response
+	 */
+	public function execute()
+	{
+		// Retrieve bootstrap prototype
+		$db     = self::$bootstrap->get('db');
+		$parser = self::$bootstrap->get('parser');
+
+		// Prepare request configuration
+		$config = new Collection();
+		$config->set('controller', PATH_SYS . PATH_CLASS . 'controller' . EXT);
+		$config->set('method', self::$method);
+		$config->set('db', $db);
+		$config->set('parser', $parser);
+
+
+		// Create a new request and output the response
+		$instance = self::factory('Request', $config);
+
+		return $instance->route()->execute();
 	}
 
 	/**
@@ -195,7 +216,7 @@ class Juriya {
 				// We expect that this was just to check
 				if ($trace['function'] == 'class_exists' || $trace['function'] == 'file_exists') {
 					$valid_e = FALSE;
-					Logger::write(__CLASS__, $class . ' not found.', 2);
+					Logger::write(__CLASS__, $class . ' not found in all system classes.', 2);
 
 					continue;
 				}
@@ -203,7 +224,7 @@ class Juriya {
 
 			// Write error, and let further existed autoloader process it
 			if ($valid_e) {
-				Logger::write(__CLASS__, $class . ' not found.', 3);
+				Logger::write(__CLASS__, $class . ' not found in all system classes.', 2);
 			}
 		}
 	}

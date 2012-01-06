@@ -1,7 +1,7 @@
 <?php namespace Juriya;
 
 /**
- * Juriya - RAD PHP 5 Micro Framework
+ * Juriya - RAD PHP Framework
  *
  * Request class
  *
@@ -19,7 +19,17 @@ class Request {
 	public $method;
 
 	/**
-	 * @var object Routes information for corresponding request
+	 * @var mixed    DB prototype
+	 */
+	public static $db;
+
+	/**
+	 * @var mixed    Parser prototype
+	 */
+	public static $parser;
+
+	/**
+	 * @var object   Routes information for corresponding request
 	 */
 	public $routes;
 
@@ -29,6 +39,8 @@ class Request {
 		if ($config->valid()) {
 			// Get the environment runtime
 			$this->method = $config->get('method');
+			self::$db     = $config->get('db');
+			self::$parser = $config->get('parser');
 			include_once    $config->get('controller');
 		} else {
 			throw new \Exception('Cannot start Request without proper configuration');
@@ -57,10 +69,10 @@ class Request {
 
 				// Load corresponding model or/and view classes
 				if (($model_name = $ns . 'Models\\' . $fragments[1]) && class_exists($model_name)) {
-					$controller_class->model = new $model_name();
+					$controller_class->model = new $model_name(self::$db);
 				}
 
-				$controller_class->view = Juriya::factory('View');
+				$controller_class->view = Juriya::factory('View', self::$parser);
 
 				return $controller_class;
 			}
@@ -71,10 +83,10 @@ class Request {
 
 					// Load corresponding model or/and view classes
 					if (($model_name = $ns . 'Models\\' . $controller) && class_exists($model_name)) {
-						$controller_class->model = new $model_name();
+						$controller_class->model = new $model_name(self::$db);
 					}
 
-					$controller_class->view = Juriya::factory('View');
+					$controller_class->view = Juriya::factory('View', self::$parser);
 
 					return $controller_class;
 			    }

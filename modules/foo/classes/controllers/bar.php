@@ -1,7 +1,7 @@
 <?php namespace Mod\Foo\Controllers;
 
 /**
- * Juriya - RAD PHP 5 Micro Framework
+ * Juriya - RAD PHP Framework
  *
  * Foo Bar module controller
  *

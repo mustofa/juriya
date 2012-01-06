@@ -1,7 +1,7 @@
 <?php namespace Juriya;
 
 /**
- * Juriya - RAD PHP 5 Micro Framework
+ * Juriya - RAD PHP Framework
  *
  * Base View
  *
@@ -13,23 +13,37 @@
 
 class View {
 
-	function __construct()
+	/**
+	 * @var object Parser instance
+	 */
+	public static $parser;
+
+	function __construct($parser)
 	{
-		// Include dwoo Autoloader
-		include_once PATH_PKG . 'dwoo' . DIRECTORY_SEPARATOR . 'dwooAutoload' . EXT;
+		self::$parser = $parser;
 	}
 
-	public function output($tpl = NULL, $data = NULL, $compiler = NULL)
+	public function __get($name)
 	{
-		// Instantiate new Dwoo as template parser, and process the template params
-		$parser = new \Dwoo();
+		if ($name == 'parser') return self::$parser;
+	}
 
-		if ( ! empty($tpl) && ! empty($data)) {
-			return $parser->output($tpl, $data);
-		} elseif ( ! empty($tpl) && ! empty($data) && ! empty($compiler)) {
-			return $parser->output($tpl, $data, $compiler);
+	public function __call($name, $arguments)
+	{
+		$methodVariable = array(self::$parser, $name);
+
+		if (is_callable($methodVariable, true)) {
+			call_user_func_array($methodVariable, $arguments);
 		}
-		
+	}
+
+	public static function __callStatic($name, $arguments)
+	{
+		$methodVariable = array(self::$parser, $name);
+
+		if (is_callable($methodVariable, true)) {
+			call_user_func_array($methodVariable, $arguments);
+		}
 	}
 
 }

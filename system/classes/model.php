@@ -1,7 +1,7 @@
 <?php namespace Juriya;
 
 /**
- * Juriya - RAD PHP 5 Micro Framework
+ * Juriya - RAD PHP Framework
  *
  * Base Model
  *
@@ -16,17 +16,34 @@ class Model {
 	/**
 	 * @var object Database instance
 	 */
-	public $db;
+	public static $db;
 
-	function __construct()
+	function __construct($db)
 	{
-		// Include NotORM packages, configure DB param and instantiate new DB
-		include_once PATH_PKG . 'notorm' . DIRECTORY_SEPARATOR . 'NotORM' . EXT;
-		$pdo = new \PDO('mysql:host=localhost;dbname=juriya',
-	                    'juriya',
-	                    'juriya');
+		self::$db = $db;
+	}
 
-		$this->db  = new \NotORM($pdo);
+	public function __get($name)
+	{
+		if ($name == 'db') return self::$db;
+	}
+
+	public function __call($name, $arguments)
+	{
+		$methodVariable = array(self::$db, $name);
+
+		if (is_callable($methodVariable, true)) {
+			call_user_func_array($methodVariable, $arguments);
+		}
+	}
+
+	public static function __callStatic($name, $arguments)
+	{
+		$methodVariable = array(self::$db, $name);
+
+		if (is_callable($methodVariable, true)) {
+			call_user_func_array($methodVariable, $arguments);
+		}
 	}
 
 }

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Juriya - RAD PHP 5 Micro Framework
+ * Juriya - RAD PHP Framework
  *
  * @package  Juriya
  * @version  0.0.1
