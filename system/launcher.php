@@ -15,8 +15,9 @@ define('PATH_PKG',   realpath($packages)    . DIRECTORY_SEPARATOR);
 define('PATH_SYS',   realpath($system)      . DIRECTORY_SEPARATOR);
 
 // Common sub-paths
-define('PATH_CLASS', 'classes' . DIRECTORY_SEPARATOR);
-define('PATH_LIB',   'lib'     . DIRECTORY_SEPARATOR);
+define('PATH_IFC', 'interfaces' . DIRECTORY_SEPARATOR);
+define('PATH_CLS', 'classes'    . DIRECTORY_SEPARATOR);
+define('PATH_LIB', 'lib'        . DIRECTORY_SEPARATOR);
 
 // Define frameworks namespaces
 define('NS_APP', 'App\\');
@@ -49,13 +50,13 @@ ini_set('display_errors', 'Off');
  * Load main framework handler.
  *---------------------------------------------------------------
  */
-// Load main core handler classes component
-require_once PATH_SYS . PATH_CLASS . 'juriya' . EXT;
-require_once PATH_SYS . PATH_CLASS . 'exception' . EXT;
-require_once PATH_SYS . PATH_CLASS . 'logger' . EXT;
-require_once PATH_SYS . PATH_CLASS . PATH_LIB . 'socket' . EXT;
-require_once PATH_SYS . PATH_CLASS . PATH_LIB . 'data' . EXT;
-require_once PATH_SYS . PATH_CLASS . PATH_LIB . 'output' . EXT;
+// Load main core components
+require_once PATH_SYS . PATH_CLS . 'juriya'    . EXT;
+require_once PATH_SYS . PATH_CLS . 'exception' . EXT;
+require_once PATH_SYS . PATH_CLS . 'logger'    . EXT;
+require_once PATH_SYS . PATH_IFC . 'socket'    . EXT;
+require_once PATH_SYS . PATH_IFC . 'data'      . EXT;
+require_once PATH_SYS . PATH_IFC . 'output'    . EXT;
 
 /**
  *---------------------------------------------------------------

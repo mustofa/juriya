@@ -3,10 +3,8 @@
 return array(
 	// This will used as Model DB instance
 	'db'     => array('prototype' => function() {
-                          /**
-                          * Use NotORM as DB instance
-                          */
-                          // Uncomment below blocks
+                          // To use NotORM as DB instance,
+                          // uncomment below blocks
                           /*
                           // Include NotORM from packages 
                           include_once PATH_PKG . 'notorm' . DIRECTORY_SEPARATOR . 'NotORM' . EXT;
@@ -22,10 +20,8 @@ return array(
 	                  }),
 	// This will used as View Parser instance
 	'parser' => array('prototype' => function() {
-                          /**
-                          * Use dwoo as parser instance
-                          */
-                          // Uncomment below blocks
+                          // To use dwoo as parser instance,
+                          // uncomment below blocks
                           /*
                           // Include dwoo Autoloader from packages
                           include_once PATH_PKG . 'dwoo' . DIRECTORY_SEPARATOR . 'dwooAutoload' . EXT;

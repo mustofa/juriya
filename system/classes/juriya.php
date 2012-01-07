@@ -144,7 +144,7 @@ class Juriya {
 
 		// Prepare request configuration
 		$config = new Collection();
-		$config->set('controller', PATH_SYS . PATH_CLASS . 'controller' . EXT);
+		$config->set('controller', PATH_SYS . PATH_CLS . 'controller' . EXT);
 		$config->set('method', self::$method);
 		$config->set('db', $db);
 		$config->set('parser', $parser);
@@ -190,22 +190,22 @@ class Juriya {
 	/**
 	 * Autoloader
 	 *
-	 * @param   string  class path
+	 * @param   string  item path
 	 * @return  mixed
 	 */
-	public static function autoload($class)
+	public static function autoload($item)
 	{
 		// Fetch then strip out the namespaces from path
 		list($namespaces, $paths) = self::_namespacePath();
-		$class_name = str_replace($namespaces, '', $class);
-		$class_name = str_replace('\\', DIRECTORY_SEPARATOR, $class_name);
+		$item_name = str_replace($namespaces, '', $item);
+		$item_name = str_replace('\\', DIRECTORY_SEPARATOR, $item_name);
 
 		// Set result pointer
 		$loaded = FALSE;
 
 		// Itterate over provided paths and include if the class exists
 		foreach ($paths as $path) {
-			$file = $path . PATH_CLASS . strtolower($class_name) . EXT;
+			$file = $path . PATH_CLS . strtolower($item_name) . EXT;
 
 			if (($class_file = $file) and file_exists($class_file)) {
 				include_once $class_file;
@@ -213,9 +213,21 @@ class Juriya {
 
 				continue;
 			}
+
+			// Look for interfaces
+			if ( ! $loaded) {
+				$file = $path . PATH_IFC . strtolower($item_name) . EXT;
+
+				if (($interface_file = $file) and file_exists($interface_file)) {
+					include_once $interface_file;
+					$loaded = TRUE;
+
+					continue;
+				}
+			}
 		}
 		
-		unset($file, $class_file);
+		unset($file, $class_file, $interface_file);
 		
 		// Check result and log appropriate warning if not exist
 		if ( ! $loaded) {
@@ -227,7 +239,7 @@ class Juriya {
 				// We expect that this was just to check
 				if ($trace['function'] == 'class_exists' || $trace['function'] == 'file_exists') {
 					$valid_e = FALSE;
-					Logger::write(__CLASS__, $class . ' not found in all system classes.', 2);
+					Logger::write(__CLASS__, $item . ' not found in all known path.', 2);
 
 					continue;
 				}
@@ -235,7 +247,7 @@ class Juriya {
 
 			// Write error, and let further existed autoloader process it
 			if ($valid_e) {
-				Logger::write(__CLASS__, $class . ' not found in all system classes.', 2);
+				Logger::write(__CLASS__, $item . ' not found in all known path.', 2);
 			}
 		}
 	}
