@@ -30,14 +30,14 @@ class FoobarTest extends PHPUnit_Framework_TestCase
 
     public function testFoobar()
     {
-        // Mimic a request which sent 'hello'
+        // Mimic a request which sent 'foo/bar'
         $_SERVER['argv'] = array('foo', 'bar');
 
         // Get the response
         $response = $this->launcher->execute();
 
         // See corresponding controller method which serve this call : 
-        // File : ./application/classes/controllers/hello.php
+        // File : ./modules/foo/classes/controllers/bar.php
         // Line : 36
         $this->assertEquals('Foo Bar', $response);
     }
