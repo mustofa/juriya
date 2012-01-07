@@ -30,27 +30,36 @@ class Controller implements Socket{
 	 */
 	public function execute()
 	{
-		return 'Empty Response';
+		return NULL;
 	}
 
 	/**
-	 * Empty response
+	 * Empty response for HTTP call
 	 * 
 	 * @return string
 	 */
 	public function executeHttp()
 	{
-		return 'Empty Response';
+		$response = Juriya::factory('Response\Http');
+		$response->code(204);
+		$response->header(array('Content-Type' => 'text/html; charset=utf-8'));
+		$response->content('');
+
+		return $response;
 	}
 
 	/**
-	 * Empty response
+	 * Empty response for CLI call
 	 * 
 	 * @return string
 	 */
 	public function executeCli()
 	{
-		return 'Empty Response';
+		$response = Juriya::factory('Response\Cli');
+		$response->type('OUT');
+		$response->content('');
+
+		return $response;
 	}
 	
 }

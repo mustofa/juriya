@@ -114,8 +114,8 @@ class Collection implements \ArrayAccess, \Iterator, \Countable, Data {
      */
     public function last() 
     {
-        end($this->collections) and $last_index = key($this->collections);
-        $collections = $this->collections[$last_index];
+        end($this->collections) and $lastIndex = key($this->collections);
+        $collections = $this->collections[$lastIndex];
         reset($this->collections);
 
         return $collections;
@@ -139,6 +139,20 @@ class Collection implements \ArrayAccess, \Iterator, \Countable, Data {
     public function count() 
     {
         return count($this->collections);
+    }
+
+    /**
+     * Handle empty
+     *
+     * @return  bool
+     */
+    public function isEmpty() 
+    {
+        if (empty($this->collections)) {
+            return true;
+        }
+
+        return false;
     }
 
     /**

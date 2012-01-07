@@ -48,20 +48,28 @@ class Logger {
 		$log        = self::$log;
 		
 		foreach ($log as $header => $content) {
-			$lines   = str_repeat('=', strlen($header)) . "\n";
-			$message = $lines . $header . "\n" . $lines;
+			// Initial empty message
+			$message = '';
 
-			foreach ($content as $line) {
-				$timestamp = key($line);
-				$message  .= $timestamp . '-' . $line[$timestamp] . "\n";
+			if ($content->isEmpty()) {
+				// Do nothing
+			} else {
+				// Iterate over all content and place as lines
+				foreach ($content as $line) {
+					$timestamp = key($line);
+					$message  .= $timestamp . '-' . $line[$timestamp] . '(' . $header . ')' . "\n";
+				}
+				
+				$logs[] = $message;
 			}
-			
-			$logs[] = $message;
 		}
 
-		$path   = PATH_APP . 'log' . DIRECTORY_SEPARATOR . date('Y-m-d') . '.txt';
-		$report = implode("\n", $logs);
-		File::append($path, $report);
+		// Just log if there are something to report
+		if ( ! empty($logs)) {
+			$path   = PATH_APP . 'log' . DIRECTORY_SEPARATOR . date('Y-m-d') . '.txt';
+			$report = implode("\n", $logs);
+			File::append($path, $report);
+		}
 	}
 
 	/**

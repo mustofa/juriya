@@ -14,42 +14,89 @@
 class File {
 
 	/**
-	 * Get the contents of a file.
+	 * Read the contents of a file.
 	 *
 	 * @param  string  File path
 	 * @return string
 	 */
-	public static function get($path)
+	public static function read($path)
 	{
-		if (file_exists($path)) {
-			return file_get_contents($path);
+		$content = '';
+
+		if (file_exists($path) and $handle = fopen($path, 'r')) {
+	        $content = fread($handle, filesize($path));
+		    fclose($handle);
 		}
 
-		return FALSE;
+		return $content;
+	}
+
+	/**
+	 * Get the contents of a file as lines.
+	 *
+	 * @param  string  File path
+	 * @return array
+	 */
+	public static function getLines($path)
+	{
+		$lines = array();
+
+		if (file_exists($path) and $handle = fopen($path, 'r')) {
+
+	        while (($line = fgets($handle, 4096)) !== false) {
+	        	$lines[] = $line;
+		    }
+
+		    if ( ! feof($handle)) {
+		    	return $lines;
+		    }
+
+		    fclose($handle);
+		}
+
+	    return $lines;
 	}
 
 	/**
 	 * Write to a file.
 	 *
-	 * @param  string  File path
-	 * @param  string  Content
+	 * @param  string    File path
+	 * @param  string    Content
+	 * @throws exception Permission denied or not writable
 	 * @return int
 	 */
-	public static function set($path, $data)
+	public static function write($path, $data)
 	{
-		return file_put_contents($path, $data, LOCK_EX);
+		if ( ! $handle = fopen($path, 'w+')) {
+	         throw new \UnexpectedValueException($path . ' is not writable file');
+	    }
+
+	    fwrite($handle, $data);
+	    fclose($handle);
+	    chmod($path, 0755);
+
+		return;
 	}
 
 	/**
 	 * Append to a file.
 	 *
-	 * @param  string  File path
-	 * @param  string  content
+	 * @param  string    File path
+	 * @param  string    content
+	 * @throws exception Permission denied or not writable
 	 * @return int
 	 */
 	public static function append($path, $data)
 	{
-		return file_put_contents($path, $data, LOCK_EX | FILE_APPEND);
+		if ( ! $handle = fopen($path, 'a+')) {
+	         throw new \UnexpectedValueException($path . ' is not writable file');
+	    }
+
+	    fwrite($handle, $data);
+	    fclose($handle);
+	    chmod($path, 0755);
+
+		return;
 	}
 
 	/**

@@ -17,7 +17,7 @@ use \Juriya\Request;
 use \Juriya\Response\Http;
 use \Juriya\Response\Cli;
 
-class Hello extends Controller{
+class Hello extends Controller {
 	
 	/**
 	 * Serve HMVC or/and Unit Testing
@@ -79,6 +79,7 @@ class Hello extends Controller{
 
 		// $foobar = Request::factory('foo.bar')->execute();
 
+		// Perform regular HTTP response
 		$response = new Http();
 		$response->code(200);
 		$response->header(array('Content-Type' => 'text/html; charset=utf-8'));
@@ -109,6 +110,7 @@ class Hello extends Controller{
 	 */
 	public function executeCli($arg1 = NULL, $arg2 = NULL)
 	{
+		// Perform regular CLI response
 		$response = new Cli();
 		$response->type('OUT');
 		$response->content('Hello World');
