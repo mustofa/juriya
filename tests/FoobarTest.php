@@ -28,7 +28,7 @@ class FoobarTest extends PHPUnit_Framework_TestCase
         unset($launcher);
     }
 
-    public function testHello()
+    public function testFoobar()
     {
         // Mimic a request which sent 'hello'
         $_SERVER['argv'] = array('foo', 'bar');

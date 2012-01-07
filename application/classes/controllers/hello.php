@@ -35,6 +35,10 @@ class Hello extends Controller{
 	 */
 	public function execute($arg1 = NULL, $arg2 = NULL)
 	{
+		if ( ! empty($arg1) && ! empty($arg1)) {
+			return array($arg1, $arg2);
+		}
+
 		return 'Hello World';
 	}
 
