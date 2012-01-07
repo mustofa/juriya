@@ -64,31 +64,41 @@ class Request {
 			
 		    $ns = NS_MOD . ucfirst($fragments[0]) . '\\';
 		    
-			if (($class_name = $ns . 'Controllers\\' . $fragments[1]) && class_exists($class_name)) {
-				$controller_class = new $class_name();
+			if (($className = $ns . 'Controllers\\' . $fragments[1]) && class_exists($className)) {
+				$controllerClass = new $className();
 
-				// Load corresponding model or/and view classes
-				if (($model_name = $ns . 'Models\\' . $fragments[1]) && class_exists($model_name)) {
-					$controller_class->model = new $model_name(self::$db);
+				// Validate interface integrity
+				if ( ! $controllerClass instanceof Socket) {
+					throw new \RangeException('Invalid Controller');
 				}
 
-				$controller_class->view = Juriya::factory('View', self::$parser);
+				// Load corresponding model or/and view classes
+				if (($modelName = $ns . 'Models\\' . $fragments[1]) && class_exists($modelName)) {
+					$controllerClass->model = new $modelName(self::$db);
+				}
 
-				return $controller_class;
+				$controllerClass->view = Juriya::factory('View', self::$parser);
+
+				return $controllerClass;
 			}
 		} else {
 			foreach (Juriya::$ns as $ns) {
-				if (($class_name = $ns . 'Controllers\\' . $controller) && class_exists($class_name)) {
-					$controller_class = new $class_name();
+				if (($className = $ns . 'Controllers\\' . $controller) && class_exists($className)) {
+					$controllerClass = new $className();
 
-					// Load corresponding model or/and view classes
-					if (($model_name = $ns . 'Models\\' . $controller) && class_exists($model_name)) {
-						$controller_class->model = new $model_name(self::$db);
+					// Validate interface integrity
+					if ( ! $controllerClass instanceof Socket) {
+						throw new \RangeException('Invalid Controller');
 					}
 
-					$controller_class->view = Juriya::factory('View', self::$parser);
+					// Load corresponding model or/and view classes
+					if (($modelName = $ns . 'Models\\' . $controller) && class_exists($modelName)) {
+						$controllerClass->model = new $modelName(self::$db);
+					}
 
-					return $controller_class;
+					$controllerClass->view = Juriya::factory('View', self::$parser);
+
+					return $controllerClass;
 			    }
 			}
 		}

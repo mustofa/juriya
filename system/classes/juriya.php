@@ -113,13 +113,13 @@ class Juriya {
 		    $index  = array_fill(0, count($values), key($item));
 
 		    // Scan the level and inspect mathced cursor
-		    $values = array_map(function ($sub_items, $parent_index) use (&$values, $index) {
+		    $values = array_map(function ($subItems, $parentIndex) use (&$values, $index) {
 		    	next($values);
 
-		    	foreach ($sub_items as $sub_index => $sub_item) {
-		    		$index = (array) $parent_index;
-		    		$keys  = explode('.', $sub_index);
-		    		Juriya::$config->set(array_merge($index, $keys), $sub_item);
+		    	foreach ($subItems as $subIndex => $subItem) {
+		    		$index = (array) $parentIndex;
+		    		$keys  = explode('.', $subIndex);
+		    		Juriya::$config->set(array_merge($index, $keys), $subItem);
 		    	}
 		    }, $values, $index);
 
@@ -195,20 +195,25 @@ class Juriya {
 	 */
 	public static function autoload($item)
 	{
+		// Ignore browser built-in request
+		if (strpos($item, 'favicon.ico') !== FALSE) {
+			return;
+		}
+
 		// Fetch then strip out the namespaces from path
 		list($namespaces, $paths) = self::_namespacePath();
-		$item_name = str_replace($namespaces, '', $item);
-		$item_name = str_replace('\\', DIRECTORY_SEPARATOR, $item_name);
+		$itemName = str_replace($namespaces, '', $item);
+		$itemName = str_replace('\\', DIRECTORY_SEPARATOR, $itemName);
 
 		// Set result pointer
 		$loaded = FALSE;
 
 		// Itterate over provided paths and include if the class exists
 		foreach ($paths as $path) {
-			$file = $path . PATH_CLS . strtolower($item_name) . EXT;
+			$file = $path . PATH_CLS . strtolower($itemName) . EXT;
 
-			if (($class_file = $file) and file_exists($class_file)) {
-				include_once $class_file;
+			if (($classFile = $file) and file_exists($classFile)) {
+				include_once $classFile;
 				$loaded = TRUE;
 
 				continue;
@@ -216,10 +221,10 @@ class Juriya {
 
 			// Look for interfaces
 			if ( ! $loaded) {
-				$file = $path . PATH_IFC . strtolower($item_name) . EXT;
+				$file = $path . PATH_IFC . strtolower($itemName) . EXT;
 
-				if (($interface_file = $file) and file_exists($interface_file)) {
-					include_once $interface_file;
+				if (($interfaceFile = $file) and file_exists($interfaceFile)) {
+					include_once $interfaceFile;
 					$loaded = TRUE;
 
 					continue;
@@ -227,18 +232,18 @@ class Juriya {
 			}
 		}
 		
-		unset($file, $class_file, $interface_file);
+		unset($file, $classFile, $interfaceFile);
 		
 		// Check result and log appropriate warning if not exist
 		if ( ! $loaded) {
 			$e       = new \Exception();
-			$valid_e = TRUE;
+			$validE  = TRUE;
 
 			// Loop over tracer, to see whether the error is really valid
 			foreach($e->getTrace() as $trace) {
 				// We expect that this was just to check
 				if ($trace['function'] == 'class_exists' || $trace['function'] == 'file_exists') {
-					$valid_e = FALSE;
+					$validE = FALSE;
 					Logger::write(__CLASS__, $item . ' not found in all known path.', 2);
 
 					continue;
@@ -246,7 +251,7 @@ class Juriya {
 			}
 
 			// Write error, and let further existed autoloader process it
-			if ($valid_e) {
+			if ($validE) {
 				Logger::write(__CLASS__, $item . ' not found in all known path.', 2);
 			}
 		}
@@ -267,8 +272,8 @@ class Juriya {
 
 		// Itterate over the namespace and instantiate requested class
 		foreach ($namespaces as $namespace) {
-			if (($class_name = $namespace . $class) && class_exists($class_name)) {
-				return (is_null($params)) ? new $class_name : new $class_name($params);
+			if (($className = $namespace . $class) && class_exists($className)) {
+				return (is_null($params)) ? new $className : new $className($params);
 			}
 		}
 

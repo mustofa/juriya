@@ -114,9 +114,9 @@ class Router {
 		// Remove query string url
 		$arguments = array_map(function ($item) use (&$arguments) {
 		    next($arguments);
-		    $sanitized_item = parse_url($item);
+		    $sanitizedItem = parse_url($item);
 
-		    return $sanitized_item['path'];
+		    return $sanitizedItem['path'];
 		}, $arguments);
 
 		// Check the routes configuration against the arguments
@@ -142,9 +142,9 @@ class Router {
 			if (count($arguments) >= 2) {
 
 				// Looking whether sub-controller is exists
-				$sub_controller = NS_APP . 'Controllers' . '\\' . implode('\\', $arguments);
+				$subController = NS_APP . 'Controllers' . '\\' . implode('\\', $arguments);
 				
-				if (class_exists($sub_controller)) {
+				if (class_exists($subController)) {
 					$this->controller = implode('\\', $arguments);
 
 					return $this;
@@ -157,13 +157,13 @@ class Router {
 				$namespace = '\\Mod\\' . ucfirst($iterator->current()) . '\\Controllers\\';
 				$iterator->next();
 				
-				while($iterator->valid()) {
+				while ($iterator->valid()) {
 					$fragments[] = $iterator->current();
 					$namespace  .= $iterator->current() . '\\';
 					$iterator->next();
 				}
 				
-				if (($class_name = substr($namespace, 0, -1)) && class_exists($class_name)) {
+				if (($className = substr($namespace, 0, -1)) && class_exists($className)) {
 
 					$this->module     = array_shift($arguments);
 					$this->path       = $this->module . '.' . implode('\\', $arguments);
@@ -173,17 +173,21 @@ class Router {
 
 			// Look-up all available namespace for matching controller
 			foreach (Juriya::$ns as $ns) {
-				if (($class_name = $ns . 'Controllers\\' . implode('\\', $arguments))
-				    && class_exists($class_name)) {
+				if (($className = $ns . 'Controllers\\' . implode('\\', $arguments))
+				    && class_exists($className)) {
 			    	// The request arguments already contain valid controller
-			    	$fragments        = new Collection(explode('\\', $class_name));
+			    	$fragments        = new Collection(explode('\\', $className));
 			    	$this->controller = ucfirst($fragments->last());
 
 			    	continue;
 			    }
 			}
 			
-			if (is_null($this->controller)) {
+			// Finalizing request diagnostic
+			if (count($arguments == 1) && $arguments[0] == 'favicon.ico') {
+				// Ignore
+				exit(1);
+			} elseif (is_null($this->controller)) {
 				throw new \DomainException('Request not found for ' . implode('/', $arguments));
 			}
 		}
@@ -200,10 +204,10 @@ class Router {
 	{
 		if ($this->tunnel == 'HTTP') {
 			// Determine the HTTP request method
-			$http_method = $this->server['REQUEST_METHOD'];
+			$httpMethod = $this->server['REQUEST_METHOD'];
 
 			// Save any http request into Juriya input properties
-			switch ($http_method) {
+			switch ($httpMethod) {
 				case 'GET':
 					Juriya::$input = $_GET;
 

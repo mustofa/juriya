@@ -51,12 +51,12 @@ ini_set('display_errors', 'Off');
  *---------------------------------------------------------------
  */
 // Load main core components
-require_once PATH_SYS . PATH_CLS . 'juriya'    . EXT;
-require_once PATH_SYS . PATH_CLS . 'exception' . EXT;
-require_once PATH_SYS . PATH_CLS . 'logger'    . EXT;
-require_once PATH_SYS . PATH_IFC . 'socket'    . EXT;
-require_once PATH_SYS . PATH_IFC . 'data'      . EXT;
-require_once PATH_SYS . PATH_IFC . 'output'    . EXT;
+require_once PATH_SYS . PATH_IFC . 'socket'     . EXT;
+require_once PATH_SYS . PATH_IFC . 'data'       . EXT;
+require_once PATH_SYS . PATH_IFC . 'output'     . EXT;
+require_once PATH_SYS . PATH_CLS . 'juriya'     . EXT;
+require_once PATH_SYS . PATH_CLS . 'exception'  . EXT;
+require_once PATH_SYS . PATH_CLS . 'logger'     . EXT;
 
 /**
  *---------------------------------------------------------------
