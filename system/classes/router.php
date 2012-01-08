@@ -184,11 +184,11 @@ class Router {
 			}
 			
 			// Finalizing request diagnostic
-			if (count($arguments == 1) && $arguments[0] == 'favicon.ico') {
+			if (($cloneArgs = $arguments) && is_array($cloneArgs) && array_shift($cloneArgs) == 'favicon.ico') {
 				// Ignore
 				exit(1);
 			} elseif (is_null($this->controller)) {
-				throw new \DomainException('Request not found for ' . implode('/', $arguments));
+				throw new \DomainException('Request not found for \'' . implode('/', $arguments) . '\'');
 			}
 		}
 		

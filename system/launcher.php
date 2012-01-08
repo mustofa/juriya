@@ -57,6 +57,7 @@ require_once PATH_SYS . PATH_IFC . 'output'     . EXT;
 require_once PATH_SYS . PATH_CLS . 'juriya'     . EXT;
 require_once PATH_SYS . PATH_CLS . 'exception'  . EXT;
 require_once PATH_SYS . PATH_CLS . 'logger'     . EXT;
+require_once PATH_SYS . PATH_CLS . 'debugger'   . EXT;
 
 /**
  *---------------------------------------------------------------
@@ -98,8 +99,7 @@ register_shutdown_function(function() {
 		Exception::make(array_values($lasterror))->handleError();
 	}
 
-	// Stop all log proccess and generate log reports
-	Logger::stop('Juriya\\Juriya');
+	// Generate log reports
 	Logger::report();
 });
 
@@ -111,7 +111,7 @@ register_shutdown_function(function() {
  // Debugger method
 function debug() {
 	$vars   = func_get_args();
-	echo call_user_func_array(array('\\Juriya\\Juriya', 'debug'), $vars);
+	echo call_user_func_array(array('\\Juriya\\Debugger', 'dump'), $vars);
 }
 
 // Logger methods

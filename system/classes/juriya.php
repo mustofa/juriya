@@ -34,9 +34,9 @@ class Juriya {
 	public static $input = array();
 
 	/**
-	 * @var string Request method
+	 * @var string Request method / Call Tunnel
 	 */
-	public static $method = 'HTTP';
+	public static $tunnel = 'HTTP';
 
 	/**
 	 * @var array Namespaces
@@ -63,8 +63,11 @@ class Juriya {
 	{
 		// Initialize system once
 		if ( ! empty($bootstrap) &&  ! empty($config) && self::initStatus() == FALSE) {
-			// Get the environment runtime
-			defined('STDIN') and self::$method = 'CLI';
+			// Start logger and turn on init status
+			Logger::start(__CLASS__);
+
+			// Get the environment runtime tunnel
+			defined('STDIN') and self::$tunnel = 'CLI';
 
 			// Register application bootstrap
 			self::register($bootstrap);
@@ -75,6 +78,17 @@ class Juriya {
 		} else {
 			throw new \RuntimeException('Cannot start Juriya proccess without proper configuration');
 		}
+	}
+
+	/**
+	 * Destructor
+	 *
+	 * @return void
+	 */
+	function __destruct()
+	{
+		// Stop logger
+		Logger::stop(__CLASS__);
 	}
 
 	/**
@@ -143,9 +157,9 @@ class Juriya {
 		$parser = self::$bootstrap->get('parser');
 
 		// Prepare request configuration
-		$config = new Collection();
+		$config = new Collection(); 
 		$config->set('controller', PATH_SYS . PATH_CLS . 'controller' . EXT);
-		$config->set('method', self::$method);
+		$config->set('tunnel', self::$tunnel);
 		$config->set('db', $db);
 		$config->set('parser', $parser);
 
@@ -172,8 +186,7 @@ class Juriya {
 	 */
 	public static function init()
 	{
-		// Start logger and turn on init status
-		Logger::start(__CLASS__);
+		// Turn on init status
 		self::$init = TRUE;
 	}
 
@@ -284,168 +297,6 @@ class Juriya {
 
 		// throw Juriya expention
 		throw new \LogicException('Class not exists');
-	}
-
-	/**
-	 * Debug variable(s)
-	 *
-	 * @return	string  HTML chunk
-	 */
-	public static function debug()
-	{
-		// Only start if there are passed variables
-		if (func_num_args() === 0) {
-			return;
-		};
-
-		// Get all passed variables 
-		$vars   = func_get_args();
-		$output = array();
-		
-		// Itterate variables and dump into readable output
-		foreach ($vars as $var) {
-			$output[] = (self::$method == 'CLI') ? var_export($var, TRUE) : self::dumpHtml($var, 1024);
-		}
-
-		// Prepare the output, then return appropriate result
-		$output = implode("\n", $output);
-
-		return (self::$method == 'CLI') ? $output : '<pre class="debug">' . $output . '</pre>';
-	}
-
-	/**
-	 * Dump variable(s) as HTML fragments
-	 *
-	 * @param   mixed   the variable to dump
-	 * @param   int     length
-	 * @param   int     depth level
-	 * @return	string  HTML chunk
-	 */
-	public static function dumpHtml(&$var, $length = 128, $level = 0)
-	{
-		$small = function($var) {
-			return '<small>' . $var . '</small>';
-		};
-
-		$span  = function($var) {
-			return '<span>(' . $var . ')</span>';
-		};
-
-		if ($var === NULL) {
-			return $small('NULL');
-		}
-
-		if (is_bool($var)) {
-			return $small('bool ') . ($var ? 'TRUE' : 'FALSE');
-		}
-		
-		if (is_float($var)) {
-			return $small('float ') . $var;
-		}
-
-		if (is_resource($var)) {
-			return $small('resource ') . $span($var);
-		}
-
-		if (is_string($var)) {
-			if (strlen($var) > $length) {
-				// Encode the truncated string
-				$str = htmlspecialchars(substr($var, 0, $length), ENT_NOQUOTES, 'utf-8') 
-				       . '&nbsp;&hellip;';
-			} else {
-				// Encode the string
-				$str = htmlspecialchars($var, ENT_NOQUOTES, 'utf-8');
-			}
-
-			return $small('string ') . $span(strlen($var)) . ' "'.$str.'"';
-		}
-
-		if (is_array($var)) {
-			// Indentation for this variable
-			$output = array();
-			$space  = str_repeat($s = '    ', $level);
-			static $marker;
-
-			if ($marker === NULL) {
-				// Make a unique marker
-				$marker = uniqid("\x00");
-			}
-
-			if (empty($var)) {
-				// Do nothing
-			} elseif (isset($var[$marker]) && ! empty($var)) {
-				$output[] = "(\n$space$s*RECURSION*\n$space)";
-			} elseif ($level < 5) {
-				$output[]     = "<span>(";
-				$var[$marker] = TRUE;
-
-				foreach ($var as $key => &$val) {
-					if ($key === $marker) {
-						continue;
-					}
-
-					if ( ! is_int($key)) {
-						$key = '"' . htmlspecialchars($key, ENT_NOQUOTES, 'utf-8') . '"';
-					}
-
-					$output[] = "$space$s$key => " . self::dumpHtml($val, $length, $level + 1);
-				}
-
-				unset($var[$marker]);
-				$output[] = "$space)</span>";
-			} else {
-				// Depth too great
-				$output[] = "(\n$space$s...\n$space)";
-			}
-
-			return $small('array') . $span(count($var)) . implode("\n", $output);
-		}
-
-		if (is_object($var)) {
-			// Copy the object as an array
-			$array = (array) $var and $output = array();
-
-			// Indentation for this variable
-			$space = str_repeat($s = '    ', $level);
-			$hash  = spl_object_hash($var);
-
-			// Objects that are being dumped
-			static $objects = array();
-
-			if (isset($objects[$hash])) {
-				$output[] = "{\n$space$s*RECURSION*\n$space}";
-			} elseif ($level < 10) {
-				$output[] = "<code>{";
-				$objects[$hash] = TRUE;
-
-				foreach ($array as $key => &$val) {
-					if ($key[0] === "\x00") {
-						// Determine the access and remove the access level from the variable name
-						$visibility = $key[1] === '*' ? 'protected' : 'private';
-						$access     = $small($visibility);
-						$key        = substr($key, strrpos($key, "\x00") + 1);
-					} else {
-						$access = $small('public');
-					}
-
-					$output[] = "$space$s$access $key => " 
-					            . self::dumpHtml($val, $length, $level + 1);
-				}
-
-				unset($objects[$hash]);
-				$output[] = "$space}</code>";
-			} else {
-				// Depth too great
-				$output[] = "{\n$space$s...\n$space}";
-			}
-
-			return $small('object')
-			       . ' <span>' . get_class($var) . '(' . count($array) . ')</span> ' 
-			       . implode("\n", $output);
-		}
-		
-		return $small(gettype($var) . ' ')
-		       . htmlspecialchars(print_r($var, TRUE), ENT_NOQUOTES, 'utf-8');
 	}
 
 	/**
