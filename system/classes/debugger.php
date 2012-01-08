@@ -22,45 +22,45 @@ class Debugger {
 	 * @var array Foreground colour dictionary
 	 */
 	public  static $foregroundColors = array('black'        => '0;30',
-                                             'dark_gray'    => '1;30',
-                                             'blue'         => '0;34',
-                                             'light_blue'   => '1;34',
-                                             'green'        => '0;32',
-                                             'light_green'  => '1;32',
-                                             'cyan'         => '0;36',
-                                             'light_cyan'   => '1;36',
-                                             'red'          => '0;31',
-                                             'light_red'    => '1;31',
-                                             'purple'       => '0;35',
-                                             'light_purple' => '1;35',
-                                             'brown'        => '0;33',
-                                             'yellow'       => '1;33',
-                                             'light_gray'   => '0;37',
-                                             'white'        => '1;37');
+	                                         'dark_gray'    => '1;30',
+	                                         'blue'         => '0;34',
+	                                         'light_blue'   => '1;34',
+	                                         'green'        => '0;32',
+	                                         'light_green'  => '1;32',
+	                                         'cyan'         => '0;36',
+	                                         'light_cyan'   => '1;36',
+	                                         'red'          => '0;31',
+	                                         'light_red'    => '1;31',
+	                                         'purple'       => '0;35',
+	                                         'light_purple' => '1;35',
+	                                         'brown'        => '0;33',
+	                                         'yellow'       => '1;33',
+	                                         'light_gray'   => '0;37',
+	                                         'white'        => '1;37');
 
 	/**
 	 * @var array Background colour dictionary
 	 */
-    public  static $backgroundColors = array('black'      => '40',
-                                             'red'        => '41',
-                                             'green'      => '42',
-                                             'yellow'     => '43',
-                                             'blue'       => '44',
-                                             'magenta'    => '45',
-                                             'cyan'       => '46',
-                                             'light_gray' => '47');
+	public  static $backgroundColors = array('black'      => '40',
+	                                         'red'        => '41',
+	                                         'green'      => '42',
+	                                         'yellow'     => '43',
+	                                         'blue'       => '44',
+	                                         'magenta'    => '45',
+	                                         'cyan'       => '46',
+	                                         'light_gray' => '47');
 
-    /**
-     * Dump vars
-     *
-     * @return mixed  Dumped variable output
-     */
-    public static function dump()
-    {
-    	// Resolve tunnel
-    	self::_resolveTunnel();
+	/**
+	 * Dump vars
+	 *
+	 * @return mixed  Dumped variable output
+	 */
+	public static function dump()
+	{
+		// Resolve tunnel
+		self::_resolveTunnel();
 
-    	// Get all passed variables 
+		// Get all passed variables 
 		$vars   = func_get_args();
 		$output = array();
 		
@@ -82,7 +82,7 @@ class Debugger {
 		} else {
 			return '<pre class="debug">' . $output . '</pre>';
 		}
-    }
+	}
 
 	/**
 	 * Dump variable
@@ -95,8 +95,8 @@ class Debugger {
 	public static function dumpVar(&$var, $length = 128, $level = 0)
 	{
 		// Resolve tunnel
-    	self::_resolveTunnel();
-    	$tunnel = self::$tunnel;
+		self::_resolveTunnel();
+		$tunnel = self::$tunnel;
 
 		$small = function($var, $tunnel) {
 			if ($tunnel == 'CLI') {
@@ -263,60 +263,60 @@ class Debugger {
 	public static function trace($type = '', $message = '', $stack = array())
 	{
 		// Resolve tunnel
-    	self::_resolveTunnel();
-    	$tunnel = self::$tunnel;
+		self::_resolveTunnel();
+		$tunnel = self::$tunnel;
 
-    	if ($tunnel == 'CLI') {
+		if ($tunnel == 'CLI') {
 			$output  = self::getColoredString(str_pad('TYPE ', 7, " ", STR_PAD_LEFT), 'purple', 'yellow');
 			$output .= self::getColoredString($type, NULL, 'cyan') . "\n";
 			$output .= self::getColoredString(str_pad('MSG ', 7, " ", STR_PAD_LEFT), 'purple', 'yellow');
 			$output .= self::getColoredString($message, NULL, 'cyan') . "\n";
-    	} else {
+		} else {
 			$output  = '<strong>' . str_pad('TYPE ', 7, " ", STR_PAD_LEFT) . '</strong><span>' . $type . '</span>'  . "\n";
 			$output .= '<strong>' . str_pad('MSG ', 7, " ", STR_PAD_LEFT) . '</strong><span>' . $message . '</span>'  . "\n";
-    	}
+		}
 
-    	if ( ! empty($stack)) {
-    		// Begin format the stack trace
-    		$formatedStack = array();
-    		$paddedSpace   = '        ';
+		if ( ! empty($stack)) {
+			// Begin format the stack trace
+			$formatedStack = array();
+			$paddedSpace   = '        ';
 
-    		foreach ($stack as $index => $item) {
-    			$itemNode = '';
+			foreach ($stack as $index => $item) {
+				$itemNode = '';
 
-    			// Add new line for CLI
-    			if ($tunnel == 'CLI') {
-    				$itemNode .= self::getColoredString($paddedSpace . str_pad('Level ' . ($index + 1), 10, ' ', STR_PAD_LEFT),
-    				                                    NULL, 'cyan');
+				// Add new line for CLI
+				if ($tunnel == 'CLI') {
+					$itemNode .= self::getColoredString($paddedSpace . str_pad('Level ' . ($index + 1), 10, ' ', STR_PAD_LEFT),
+					                                    NULL, 'cyan');
 					$itemNode .= "\n";
-    			}
+				}
 
-    			foreach ($item as $head => $body) {
-    				// Parse the arguments
-    				if ($head == 'args') {
-    					$body = var_export($body, TRUE);
-    					$body = str_replace("\n", '', $body);
-    				}
+				foreach ($item as $head => $body) {
+					// Parse the arguments
+					if ($head == 'args') {
+						$body = var_export($body, TRUE);
+						$body = str_replace("\n", '', $body);
+					}
 
-    				// Build the trace stack
-    				if ($tunnel == 'CLI') {
-    					$itemNode .= self::getColoredString($paddedSpace . str_pad(strtoupper($head), 10, " ", STR_PAD_LEFT), 
-    					                                    'red', 'light_gray'); 
+					// Build the trace stack
+					if ($tunnel == 'CLI') {
+						$itemNode .= self::getColoredString($paddedSpace . str_pad(strtoupper($head), 10, " ", STR_PAD_LEFT), 
+						                                    'red', 'light_gray'); 
 	    				$itemNode .= self::getColoredString($body, NULL, 'cyan') . "\n";
-    				} else {
+					} else {
 	    				$itemNode .= $paddedSpace . '<strong>' 
 	    				             . str_pad(strtoupper($head), 10, " ", STR_PAD_LEFT) 
 	    				             . ' </strong>';
 	    				$itemNode .= '<span>' . $body . ' </span>' . "\n";
-    					
-    				}
-    			}
-    			
-    			$formatedStack[] = $itemNode;
-    		}
+						
+					}
+				}
+				
+				$formatedStack[] = $itemNode;
+			}
 
-    		// Return the stack trace based by request's tunnel method
-    		if ($tunnel == 'CLI') {
+			// Return the stack trace based by request's tunnel method
+			if ($tunnel == 'CLI') {
 
 				$output .= self::getColoredString(str_pad('STACK ', 7, " ", STR_PAD_LEFT), 'purple', 'yellow') 
 				           . self::getColoredString(count($formatedStack) . ' level(s)', NULL, 'cyan')
@@ -326,8 +326,8 @@ class Debugger {
 			} else {
 	    		$output .= '<strong>' . str_pad('STACK ', 7, " ", STR_PAD_LEFT) . '</strong>' . "\n"
 	    		           . implode("\n", $formatedStack);
-    		}
-    	}
+			}
+		}
 
 		// Return the formatted dump
 		if (self::$tunnel == 'CLI') {
@@ -338,49 +338,49 @@ class Debugger {
 	}
 
 	/**
-     * Returns colored string
-     *
-     * @param  string  The string to output
-     * @param  string  Foreground color
-     * @param  string  background color
-     * @return string  Colored string
-     */
-    public static function getColoredString($string, $foregroundColor = null, $backgroundColor = null) {
-        $colored_string = "";
+	 * Returns colored string
+	 *
+	 * @param  string  The string to output
+	 * @param  string  Foreground color
+	 * @param  string  background color
+	 * @return string  Colored string
+	 */
+	public static function getColoredString($string, $foregroundColor = null, $backgroundColor = null) {
+		$colored_string = "";
 
-        // Check if given foreground color found
-        if (isset(self::$foregroundColors[$foregroundColor])) {
-            $colored_string .= "\033[" . self::$foregroundColors[$foregroundColor] . "m";
-        }
+		// Check if given foreground color found
+		if (isset(self::$foregroundColors[$foregroundColor])) {
+		    $colored_string .= "\033[" . self::$foregroundColors[$foregroundColor] . "m";
+		}
 
-        // Check if given background color found
-        if (isset(self::$backgroundColors[$backgroundColor])) {
-            $colored_string .= "\033[" . self::$backgroundColors[$backgroundColor] . "m";
-        }
+		// Check if given background color found
+		if (isset(self::$backgroundColors[$backgroundColor])) {
+		    $colored_string .= "\033[" . self::$backgroundColors[$backgroundColor] . "m";
+		}
 
-        // Add string and end coloring
-        $colored_string .=  $string . "\033[0m";
+		// Add string and end coloring
+		$colored_string .=  $string . "\033[0m";
 
-        return $colored_string;
-    }
+		return $colored_string;
+	}
 
-    /**
-     * Returns all foreground color names
-     *
-     * @return array  Array of foreground color
-     */
-    public static function getForegroundColors() {
-        return array_keys(self::$foregroundColors);
-    }
+	/**
+	 * Returns all foreground color names
+	 *
+	 * @return array  Array of foreground color
+	 */
+	public static function getForegroundColors() {
+		return array_keys(self::$foregroundColors);
+	}
 
-    /**
-     * Returns all background color names
-     * 
-     * @return array  Array of background color
-     */
-    public static function getBackgroundColors() {
-        return array_keys(self::$backgroundColors);
-    }
+	/**
+	 * Returns all background color names
+	 * 
+	 * @return array  Array of background color
+	 */
+	public static function getBackgroundColors() {
+		return array_keys(self::$backgroundColors);
+	}
 
 	/**
 	 * Resolve tunnel
