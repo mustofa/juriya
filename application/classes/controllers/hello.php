@@ -113,7 +113,7 @@ class Hello extends Controller {
 		// Perform regular CLI response
 		$response = new Cli();
 		$response->type('OUT');
-		$response->content('Hello World');
+		$response->content('Hello World' . "\n");
 
 		return $response;
 	}

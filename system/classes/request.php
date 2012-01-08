@@ -14,9 +14,9 @@
 class Request {
 
 	/**
-	 * @var instance Runtime environment
+	 * @var instance Runtime environment / Tunnel
 	 */
-	public $method;
+	public $tunnel;
 
 	/**
 	 * @var mixed    DB prototype
@@ -38,7 +38,7 @@ class Request {
 		// Initialize the request
 		if ($config->valid()) {
 			// Get the environment runtime
-			$this->method = $config->get('method');
+			$this->tunnel = $config->get('tunnel');
 			self::$db     = $config->get('db');
 			self::$parser = $config->get('parser');
 			include_once    $config->get('controller');
@@ -83,6 +83,7 @@ class Request {
 			}
 		} else {
 			foreach (Juriya::$ns as $ns) {
+
 				if (($className = $ns . 'Controllers\\' . $controller) && class_exists($className)) {
 					$controllerClass = new $className();
 
@@ -116,14 +117,13 @@ class Request {
 		// Set router configuration
 		$config = new Collection();
 		$config->set('server', $_SERVER);
-		$config->set('tunnel', $this->method);
-
+		$config->set('tunnel', $this->tunnel);
 		// Exception for Unit Testing environment
 		// Use the HMVC tunnel instead `HTTP` or `CLI`
 		if (ENVIRONMENT == 'test') {
 			$config->set('executor', 'execute');
 		} else {
-			$config->set('executor', 'execute' . ucfirst(strtolower($this->method)));
+			$config->set('executor', 'execute' . ucfirst(strtolower($this->tunnel)));
 		}
 
 		// Instantiate and execute new routing process

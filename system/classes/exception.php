@@ -92,14 +92,14 @@ class Exception {
 	    switch ($this->error[0]) {
 		    case E_USER_ERROR:
 		        Logger::write('Juriya\\Juriya', $message, 3);
-				echo Juriya::debug($header, $this->_parseMessage($message));
+				echo Debugger::trace($header, $this->_parseMessage($message));
 		        exit(1);
 
 		        break;
 
 		    default:
 				Logger::write('Juriya\\Juriya', $message, 2);
-				echo Juriya::debug($header, $this->_parseMessage($message));
+				echo Debugger::trace($header, $this->_parseMessage($message));
 
 		        break;
 	    }
@@ -120,7 +120,7 @@ class Exception {
 		                           $this->exception->getFile(),
 		                           $this->exception->getLine());
 		Logger::write('Juriya\\Juriya', $message, 3);
-		echo Juriya::debug($severity, $message, $this->exception->getTrace());
+		echo Debugger::trace($severity, $message, $this->exception->getTrace());
 	}
 
 	/**

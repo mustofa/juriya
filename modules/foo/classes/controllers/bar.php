@@ -72,7 +72,7 @@ class Bar extends Controller {
 	{
 		$response = new Cli();
 		$response->type('OUT');
-		$response->content('Foo Bar');
+		$response->content('Foo Bar' . "\n");
 
 		return $response;
 	}
