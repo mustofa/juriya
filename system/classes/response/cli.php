@@ -18,12 +18,12 @@ class Cli implements Output {
     /**
      * @var string Hold CLI output type
      */
-	protected $type;
+    protected $type;
 
     /**
      * @var string Hold CLI content/stream
      */
-	protected $content;
+    protected $content;
 
     /**
      * Constructor
@@ -32,11 +32,11 @@ class Cli implements Output {
      * @param   string  CLI content
      * @return  void
      */
-	function __construct($type = 'OUT', $content = '')
-	{
-		$this->type    = $type;
-		$this->content = $content;
-	}
+    function __construct($type = 'OUT', $content = '')
+    {
+    	$this->type    = $type;
+    	$this->content = $content;
+    }
 
     /**
      * Render the response to command-line
