@@ -1,4 +1,4 @@
-[![Build Status](https://secure.travis-ci.org/toopay/juriya.png?branch=develop)](http://travis-ci.org/toopay/juriya)
+[![Build Status](https://secure.travis-ci.org/juriya/juriya.png?branch=develop)](http://travis-ci.org/juriya/juriya)
 
 Juriya
 ======

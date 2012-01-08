@@ -60,48 +60,41 @@ class Request {
 	 */
 	public static function factory($controller = '')
 	{
+		// Initial empty name
+		$controllerName = '';
+
 		if (($fragments = explode('.', $controller)) && count($fragments) == 2) {
 			
 		    $ns = NS_MOD . ucfirst($fragments[0]) . '\\';
 		    
 			if (($className = $ns . 'Controllers\\' . $fragments[1]) && class_exists($className)) {
 				$controllerClass = new $className();
-
-				// Validate interface integrity
-				if ( ! $controllerClass instanceof Socket) {
-					throw new \RangeException('Invalid Controller');
-				}
-
-				// Load corresponding model or/and view classes
-				if (($modelName = $ns . 'Models\\' . $fragments[1]) && class_exists($modelName)) {
-					$controllerClass->model = new $modelName(self::$db);
-				}
-
-				$controllerClass->view = Juriya::factory('View', self::$parser);
-
-				return $controllerClass;
+				$controllerName  = $fragments[1];
 			}
 		} else {
 			foreach (Juriya::$ns as $ns) {
 
 				if (($className = $ns . 'Controllers\\' . $controller) && class_exists($className)) {
 					$controllerClass = new $className();
-
-					// Validate interface integrity
-					if ( ! $controllerClass instanceof Socket) {
-						throw new \RangeException('Invalid Controller');
-					}
-
-					// Load corresponding model or/and view classes
-					if (($modelName = $ns . 'Models\\' . $controller) && class_exists($modelName)) {
-						$controllerClass->model = new $modelName(self::$db);
-					}
-
-					$controllerClass->view = Juriya::factory('View', self::$parser);
-
-					return $controllerClass;
+					$controllerName  = $controller;
 			    }
 			}
+		}
+
+		if ( ! empty($controllerName)) {
+			// Validate interface integrity
+			if ( ! $controllerClass instanceof Socket) {
+				throw new \RangeException('Invalid Controller');
+			}
+
+			// Load corresponding model or/and view classes
+			if (($modelName = $ns . 'Models\\' . $controllerName) && class_exists($modelName)) {
+				$controllerClass->model = new $modelName(self::$db);
+			}
+
+			$controllerClass->view = Juriya::factory('View', self::$parser);
+
+			return $controllerClass;
 		}
 	
 		throw new \LogicException('Controller not exists');
