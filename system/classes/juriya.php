@@ -257,7 +257,6 @@ class Juriya {
 				// We expect that this was just to check
 				if ($trace['function'] == 'class_exists' || $trace['function'] == 'file_exists') {
 					$validE = FALSE;
-					Logger::write(__CLASS__, $item . ' not found in all known path.', 2);
 
 					continue;
 				}
