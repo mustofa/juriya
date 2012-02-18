@@ -108,7 +108,7 @@ class Debugger {
 
 		$span  = function($var, $tunnel) {
 			if ($tunnel == 'CLI') {
-				return Debugger::getColoredString($var, null, 'cyan');
+				return Debugger::getColoredString($var, NULL, 'cyan');
 			} else {
 				return '<span>(' . $var . ')</span>';
 			}
@@ -345,7 +345,7 @@ class Debugger {
 	 * @param  string  background color
 	 * @return string  Colored string
 	 */
-	public static function getColoredString($string, $foregroundColor = null, $backgroundColor = null) {
+	public static function getColoredString($string, $foregroundColor = NULL, $backgroundColor = NULL) {
 		$colored_string = "";
 
 		// Check if given foreground color found

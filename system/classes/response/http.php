@@ -19,17 +19,17 @@ class Http implements Output {
     /**
      * @var array Hold HTTP headers statement
      */
-	protected $headers;
+    protected $headers;
 
     /**
      * @var string Hold HTTP content/stream
      */
-	protected $content;
+    protected $content;
 
-     /**
+    /**
      * @var array HTTP Code Dictionary
      */
-	protected static $codes = array(100 => 'Continue',
+    protected static $codes = array(100 => 'Continue',
                                     101 => 'Switching Protocols',
                                     200 => 'OK',
                                     201 => 'Created',

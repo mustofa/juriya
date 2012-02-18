@@ -43,7 +43,7 @@ class File {
 
 		if (file_exists($path) and $handle = fopen($path, 'r')) {
 
-	        while (($line = fgets($handle, 4096)) !== false) {
+	        while (($line = fgets($handle, 4096)) !== FALSE) {
 	        	$lines[] = $line;
 		    }
 
