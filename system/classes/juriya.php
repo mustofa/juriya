@@ -69,10 +69,9 @@ class Juriya {
 			// Get the environment runtime tunnel
 			defined('STDIN') and self::$tunnel = 'CLI';
 
-			// Register application bootstrap
+			// Register application bootstrap and configure the framework
+			// then we're done
 			self::register($bootstrap);
-
-			// Configure
 			self::configure($config->get('configuration'));
 			self::init();
 		} else {
@@ -277,7 +276,7 @@ class Juriya {
 	 * @throws  object  Juriya Exception
 	 * @return  object  class instance
 	 */
-	public static function factory($class, $params = null)
+	public static function factory($class, $params = NULL)
 	{
 		// Fetch namespaces and paths
 		list($namespaces, $paths) = self::_namespacePath();

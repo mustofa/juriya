@@ -128,7 +128,7 @@ class Collection implements \ArrayAccess, \Iterator, \Countable, Data {
      */
     public function valid() 
     {
-        return $this->current() !== false;
+        return $this->current() !== FALSE;
     }    
 
     /**
@@ -149,10 +149,10 @@ class Collection implements \ArrayAccess, \Iterator, \Countable, Data {
     public function isEmpty() 
     {
         if (empty($this->collections)) {
-            return true;
+            return TRUE;
         }
 
-        return false;
+        return FALSE;
     }
 
     /**
@@ -182,7 +182,7 @@ class Collection implements \ArrayAccess, \Iterator, \Countable, Data {
      * @param   mixed
      * @return  int
      */
-    public function get($path = null, $default = FALSE) 
+    public function get($path = NULL, $default = FALSE) 
     {
         // Create new array for processing
         $array = $this->collections;

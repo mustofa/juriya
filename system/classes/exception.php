@@ -105,7 +105,7 @@ class Exception {
 	    }
 
     	// Don't execute PHP internal error handler
-    	return true;
+    	return TRUE;
 	}
 
 	/**

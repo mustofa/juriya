@@ -32,7 +32,7 @@ class Model {
 	{
 		$methodVariable = array(self::$db, $name);
 
-		if (is_callable($methodVariable, true)) {
+		if (is_callable($methodVariable, TRUE)) {
 			call_user_func_array($methodVariable, $arguments);
 		}
 	}
@@ -41,7 +41,7 @@ class Model {
 	{
 		$methodVariable = array(self::$db, $name);
 
-		if (is_callable($methodVariable, true)) {
+		if (is_callable($methodVariable, TRUE)) {
 			call_user_func_array($methodVariable, $arguments);
 		}
 	}
