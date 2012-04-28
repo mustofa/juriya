@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<phpunit 
+	bootstrap="bootstrap.php"
+	colors="true"
+	convertNoticesToExceptions="true"
+	convertWarningsToExceptions="true"
+	stopOnError="false"
+	stopOnFailure="false"
+	stopOnIncomplete="false"
+	stopOnSkipped="false">
+	<php>
+		<const name="PORT" value="8098"/>
+	</php>
+	<testsuites>
+		<testsuite name="Juriya Test Suite">
+			<directory suffix="test.php">juriya</directory>
+		</testsuite>
+	</testsuites>
+</phpunit>
